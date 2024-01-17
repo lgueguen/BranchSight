@@ -58,6 +58,11 @@ Modified by Grégoire ALIZADEH NOIRET, 15 March 2023
             <span>Width +</span>
             <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
           </button>
+          <!-- Bouton Increase width -->
+          <button id="loga" class="btn btn-sm btn-outline-secondary" type="button" aria-label="Logarithmic scale" data-toggle="tooltip" data-placement="top" title="Logarithmic scale">
+            <span>Logarithmic</span>
+            <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+          </button>          
         </div>
         <div class="btn-group" role="group" aria-label="Height buttons">
           <!-- Bouton Reduce height -->
@@ -109,8 +114,8 @@ Modified by Grégoire ALIZADEH NOIRET, 15 March 2023
         <button class="btn btn-sm btn-outline-secondary">
           <div class="input-group align-items-center">
             <label for="ps-threshold-low">Thresholds</label>
-            <input id="ps-threshold-low" type="number" min="0.0" step="0.05" placeholder="PS Threshold" value="0.9" style="width: 5em;"/>
-            <input id="ps-threshold-high" type="number" min="0.0" step="0.05" placeholder="PS Threshold" value="1.0" style="width: 5em;"/>
+            <input id="ps-threshold-low"  placeholder="PS Threshold" value="0.9" style="width: 5em;"/>
+            <input id="ps-threshold-high" placeholder="PS Threshold" value="1.0" style="width: 5em;"/>
           </div>
         </button>
         <div>
@@ -225,7 +230,7 @@ var upperThresholdMode = true;
 
 /*var coloraa = new Object();
 
-coloraa["K"]= "rgb(230,51,25)"  
+coloraa["K"]= "rgb(230,51,25)"
 coloraa["R"]= "rgb(230,51,25)"
 
 coloraa["A"]= "rgb(25,128,230)"
@@ -256,60 +261,100 @@ coloraa["G"]= "rgb(230,153,77)"
 coloraa["-"] = "white";
   */
 
-var rgbaa = new Object();
+// var rgbaa = new Object();
+//
+// rgbaa["K"]= [230,51,25];
+// rgbaa["R"]= [230,51,25];
+//
+// rgbaa["A"]= [25,128,230];
+// rgbaa["F"]= [25,128,230];
+// rgbaa["I"]= [25,128,230];
+// rgbaa["L"]= [25,128,230];
+// rgbaa["M"]= [25,128,230];
+// rgbaa["V"]= [25,128,230];
+// rgbaa["W"]= [25,128,230];
+//
+// rgbaa["N"]= [25,204,25];
+// rgbaa["Q"]= [25,204,25];
+// rgbaa["S"]= [25,204,25];
+// rgbaa["T"]= [25,204,25];
+//
+// rgbaa["H"]= [25,179,179];
+// rgbaa["Y"]= [25,179,179];
+//
+// rgbaa["C"]= [230,128,128];
+//
+// rgbaa["D"]= [204,77,204];
+// rgbaa["E"]= [204,77,204];
+//
+// rgbaa["P"]= [204,204,0];
+//
+// rgbaa["G"]= [230,153,77];
+//
+// rgbaa["-"] = [255,255,255];
+// rgbaa["*"] = [0,0,0];
 
-rgbaa["K"]= [230,51,25];  
-rgbaa["R"]= [230,51,25];
 
-rgbaa["A"]= [25,128,230];
-rgbaa["F"]= [25,128,230];
-rgbaa["I"]= [25,128,230];
-rgbaa["L"]= [25,128,230];
-rgbaa["M"]= [25,128,230];
-rgbaa["V"]= [25,128,230];
-rgbaa["W"]= [25,128,230];
+var hslaa = new Object();
 
-rgbaa["N"]= [25,204,25];
-rgbaa["Q"]= [25,204,25];
-rgbaa["S"]= [25,204,25];
-rgbaa["T"]= [25,204,25];
+hslaa["K"]= [8,80,50];
+hslaa["R"]= [8,80,50];
 
-rgbaa["H"]= [25,179,179];
-rgbaa["Y"]= [25,179,179];
+hslaa["A"]= [210,80,50];
+hslaa["F"]= [210,80,50];
+hslaa["I"]= [210,80,50];
+hslaa["L"]= [210,80,50];
+hslaa["M"]= [210,80,50];
+hslaa["V"]= [210,80,50];
+hslaa["W"]= [210,80,50];
 
-rgbaa["C"]= [230,128,128];
+hslaa["N"]= [120,78,45];
+hslaa["Q"]= [120,78,45];
+hslaa["S"]= [120,78,45];
+hslaa["T"]= [120,78,45];
 
-rgbaa["D"]= [204,77,204];
-rgbaa["E"]= [204,77,204];
+hslaa["H"]= [180,75,40];
+hslaa["Y"]= [180,75,40];
 
-rgbaa["P"]= [204,204,0];
+hslaa["C"]= [0,67,70];
 
-rgbaa["G"]= [230,153,77];
+hslaa["D"]= [300,55,55];
+hslaa["E"]= [300,55,55];
 
-rgbaa["-"] = [255,255,255];
-rgbaa["*"] = [0,0,0];
+hslaa["P"]= [60,100,40];
+
+hslaa["G"]= [30,75,60];
+
+hslaa["-"] = [0,0,100];
+hslaa["*"] = [0,0,0];
 
 var flag_redond = 1;
 
 // Fonction rgb ->cold
 // ---------------------------------------
-function  rgb2col(rgb) {
-  var col = "rgb("+rgb[0]+","+rgb[1]+","+rgb[2]+")";
+// function  rgb2col(rgb) {
+//   var col = "rgb("+rgb[0]+","+rgb[1]+","+rgb[2]+")";
+//   return col
+// }
+
+// Fonction rgb ->cold
+// ---------------------------------------
+function  hsl2col(rgb) {
+  var col = "hsl("+rgb[0]+","+rgb[1]+"%,"+rgb[2]+"%)";
   return col
 }
-
 var colordna = new Object();
 var colordna_red = new Object();
 var geneticcode = xmlparser.flatTree(recTree.phyloxml.phylogeny.geneticCode);
 geneticcode["---"] = "-";
 
-  for (d in geneticcode){ 
+  for (d in geneticcode){
     var col = "grey";
     var _aa = geneticcode[d];
     if (_aa != undefined)  {
-      var _rgb = rgbaa[_aa];
-      if (_rgb != undefined) {
-        col = rgb2col(_rgb)
+      var _hsl = hslaa[_aa];
+      if (_hsl != undefined) {
+        col = hsl2col(_hsl)
       }
 
     }
@@ -319,7 +364,7 @@ geneticcode["---"] = "-";
 
 var redond_dna = new Object();
 
-for (d in geneticcode){ 
+for (d in geneticcode){
     var _aa = geneticcode[d];
     if (_aa in redond_dna) {
       redond_dna[_aa].push(d);
@@ -333,29 +378,19 @@ for (d in geneticcode){
 /*Redefinit les couleurs des codons*/
 console.log("REDOND = ");
 console.log(redond_dna);
-var step_satur = 90;
+var step_satur = 50;
 
 for (d in redond_dna){
   var _codons =  redond_dna[d];
   if (d != "*" && d!= "-") {
     for (i = 0;i < _codons.length;i++) {
-      var _rgb =  rgbaa[d];
-      var new_rgb = [128,128,128];
-      console.log("red"+d+" => "+_codons[i]+ " : " +_rgb[0]+ " : " +_rgb[1]+ " : " +_rgb[2]);
-      if (_rgb[0] > 128) { new_rgb[0] = _rgb[0] - Math.floor(i* step_satur / _codons.length)};
-      if (_rgb[0] < 128) { new_rgb[0] = _rgb[0] + Math.floor(i* step_satur / _codons.length)};
-
-      if (_rgb[1] > 128) { new_rgb[1] = _rgb[1] - Math.floor(i* step_satur / _codons.length)};
-      if (_rgb[1] < 128) { new_rgb[1] = _rgb[1] + Math.floor(i* step_satur / _codons.length)};
-
-      if (_rgb[2] > 128) { new_rgb[2] = _rgb[2] - Math.floor(i* step_satur / _codons.length)};
-      if (_rgb[2] < 128) { new_rgb[2] = _rgb[2] + Math.floor(i* step_satur / _codons.length)};   
-
-      console.log(_codons[i]+ "avant "+ colordna[_codons[i]]+ " apres "+ rgb2col(new_rgb));
-      colordna_red[_codons[i]] =    rgb2col(new_rgb);
+      var _hsl =  hslaa[d];
+      var new_hsl = [_hsl[0],_hsl[1],_hsl[2] + Math.floor(i* step_satur / _codons.length)];
+      console.log(_codons[i]+ " avant "+ colordna[_codons[i]]+ " apres "+ hsl2col(new_hsl));
+      colordna_red[_codons[i]] =    hsl2col(new_hsl);
     }
   }
-} 
+}
 
 var  dico_aa = new Object();
 var  dico_dna = new Object();
@@ -557,12 +592,12 @@ function updateLayout(cRoot,firstLoad=0) {
       var aa_sequence = d.data.lastEvent.aaAlign;
       var aas = aa_sequence.split("");
       aas.forEach (function (aa,j) {
-        var col = rgbaa[aa];
+        var col = hslaa[aa];
         if (col == undefined) {
           col  = "grey"
         }
         else {
-          col = rgb2col(col);
+          col = hsl2col(col);
         };
         col_aas.push(col);
       })
@@ -1308,11 +1343,16 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
 
 // Simon : Alignement : ajout des coelurs AA
   console.log("Genere aa_dataset and dna_dataset");
-  aa_dataset = []
-  dna_dataset = []
-  d3.selectAll(".aa_block").remove(); // on vire  tout
-  d3.selectAll(".dna_block").remove();
+  aa_dataset = [];
+  dna_dataset = [];
+/*  d3.selectAll(".aa_block").remove(); // on vire  tout
+  d3.selectAll(".dna_block").remove();*/
+
+  d3.select("#aa-container").remove(); // on vire  tout
+  d3.select("#dna-container").remove();
+
   var leaves_sequences = leaves.filter(function(d) {return (d.data.lastEvent.aaAlign);});
+
   leaves_sequences.forEach (function (d,i) {
     var index = i;
     var seqname =  d.data.name;
@@ -1397,6 +1437,9 @@ seqTextAA.append('text')
       .merge(aablock)
       .attr("transform",function(d,i) {
         var transx = (d.pos)*hStep + margin.left + 30 ;
+         if (branchSite) {
+         transx = (d.pos)*hStep + seq_lg + 50 ;
+        }
         if (isCodon == 0 ) {
           transx = transx - 80 // ???
         }
@@ -1457,6 +1500,9 @@ seqTextAA.append('text')
         .merge(dnablock)
         .attr("transform",function(d,i) {
           var transx = (d.pos)*hStep + margin.left + 30 ;
+          if (branchSite) {
+            transx = (d.pos)*hStep + seq_lg + 50 ;
+          }         
           var transy = d.y - 7;
           return "translate("+transx+", "+transy+")";
         })
@@ -2136,7 +2182,7 @@ $('#selectCrossref').on('click', function(event) {
   selectedCrossref=$( "#selectCrossref option:selected" ).text();
   selectedCrossrefURL=crossref[selectedCrossref].url;
   myStorage.setItem("crossref",selectedCrossref);
-  updateLayout(cladeRoot);
+  //updateLayout(cladeRoot);
 });
 $('#selectCrossref').ready(function() {
     // selectedCrossref="HOGENOM";
@@ -2168,7 +2214,7 @@ $('#action').on('click', function(event, dropdownData) {
       $('#switch').css('color','#000000');
       $('#collapse').css('color','#000000');
       $('#subtree').css('color','#000000');
-      updateLayout(cladeRoot);
+/*      updateLayout(cladeRoot);*/
       break;
     case "Switch children":
       action = svgEvents.switchChildren;
@@ -2176,7 +2222,7 @@ $('#action').on('click', function(event, dropdownData) {
       $('#switch').css('color','#FF0000');
       $('#collapse').css('color','#000000');
       $('#subtree').css('color','#000000');
-      updateLayout(cladeRoot);
+/*      updateLayout(cladeRoot);*/
       break;
     case "Collapse/Expand":
       action = svgEvents.collapse;
@@ -2184,7 +2230,7 @@ $('#action').on('click', function(event, dropdownData) {
       $('#switch').css('color','#000000');
       $('#collapse').css('color','#FF0000');
       $('#subtree').css('color','#000000');
-      updateLayout(cladeRoot);
+/*      updateLayout(cladeRoot);*/
       break;
     case "Sub Tree/Upper Tree":
       action = svgEvents.focus;
@@ -2192,7 +2238,7 @@ $('#action').on('click', function(event, dropdownData) {
       $('#switch').css('color','#000000');
       $('#collapse').css('color','#000000');
       $('#subtree').css('color','#FF0000');
-      updateLayout(cladeRoot);
+/*      updateLayout(cladeRoot);*/
       break;
     default:
   }
@@ -2224,6 +2270,14 @@ $('#lessWidth').on('click', function(event, dropdownData) {
     nodeWidth = modStepX;
   }
   myStorage.setItem("width",nodeWidth);
+  updateLayout(cladeRoot);
+});
+$('#loga').on('click', function(event, dropdownData) {
+  if (logBranchLength) {
+    logBranchLength = false;
+  }else {
+    logBranchLength = true;
+  }
   updateLayout(cladeRoot);
 });
 $('#moreHeigth').on('click', function(event, dropdownData) {
