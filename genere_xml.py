@@ -220,7 +220,7 @@ def loadResultsBranchSite(resultsFile, nostat_value=-1.0, skipMissingSites=False
       numl = -1
       for line in f:
         line = line.strip().split()
-        site = int(line[0])
+        site = int(line[0].strip("[]"))
 
         ## line: ['0', '0.25866598', '0.66856214', '0.19517522', ...]
         if numl==-1:
@@ -249,7 +249,6 @@ def loadResultsBranchSite(resultsFile, nostat_value=-1.0, skipMissingSites=False
 
     d_cols_2 = dict(d_cols)
     nbs=len(d_cols['0'])
-    print(nbs)
     for col_key in d_cols:
       ## For every branch
       if re.search(r'^[0-9]+$', col_key):
@@ -326,7 +325,7 @@ def createPhyloXML(fam,newick,results):
     ## the first ID being 0.
 
     # Write a sequence of Tree objects to the given file or handle
-    rd = str(random.randint(0,1000))
+    rd = str(random.randint(0,10000))
     Phylo.write([trees], 'tmpfile-'+rd+'.xml', 'phyloxml')
     file = open('tmpfile-'+rd+'.xml', 'r')
     # Copies all objects in a variable and removes the created file
@@ -401,16 +400,18 @@ def createPhyloXML(fam,newick,results):
             leaf.set('speciesLocation', sp)
             if 'seqdefdico' in globals():
                 if cds in seqdefdico:
-                    leaf.set('defintiion', seqdefdico[cds])
+                    leaf.set('definition', seqdefdico[cds])
 
             ## Add sequence to leaf
             if lenres==lenseq/3:
                 isCodon="true"
                 leaf.set('dnaAlign', seq_alg) # coding sequence
                 leaf.set('aaAlign', nucToAmino(seq_alg)) # translated sequence
-            else:
-                isCodon="false"
+            elif lenres==lenseq:
+                isCodon="false"                
                 leaf.set('aaAlign', seq_alg) # raw sequence (any type)
+            else:
+                sys.exit("Mismatch lengths between alignment " + str(lenseq) + " and sites " + str(lenres))
 
             evrec.append(leaf)
             element.append(evrec)
@@ -517,9 +518,12 @@ for line in treefile:
     #     newick = tline[0]
     #     fam = ''
     current_branch = -1
-    phyloxmltree = createPhyloXML("",line,results)
-    xmloutputfile.write(phyloxmltree)
-    print("Tree OK")
+    try:
+      phyloxmltree = createPhyloXML("",line,results)
+      xmloutputfile.write(phyloxmltree)
+      print("Tree OK")
+    except ValueError:
+      sys.exit("Mismatch lengths")
 
 treefile.close()
 xmloutputfile.close()
