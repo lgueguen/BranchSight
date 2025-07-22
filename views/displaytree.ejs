@@ -240,20 +240,25 @@ function  main_display() {
   switch (myStorage.getItem("action")) {
     case 'View Branch Results':
       action = svgEvents.showBranchResults;
+      console.log(action);  
       break;
     case "Switch children":
       action = svgEvents.switchChildren;
+      console.log(action);  
       break;
     case "Collapse/Expand":
       action = svgEvents.collapse;
+      console.log(action);  
       break;
     case "Sub Tree/Upper Tree":
       action = svgEvents.focus;
+      console.log(action);  
       break;
     default:
       console.log(action);
       break;
   }
+  console.log("DEBUG STORED ACTION "+action)
   // Largeur de l'arbre
   if (tagSimpleGene === false) {
     nodeWidth = nodeWidth / 5 ;
@@ -281,12 +286,12 @@ function  main_display() {
     return d.clade;
   });  
   addNumberSeqSpec(treeRoot);
-  updateLayout(cladeRoot,1);
+  updateLayout(cladeRoot,1,1);
 }
 
 // Fonction de mise a jour de l'affichage
 // ---------------------------------------
-function updateLayout(cRoot,firstLoad=0) {
+function updateLayout(cRoot,firstLoad=0,scrolling=1) {
   var treeRoot = d3.hierarchy(cRoot, function(d) {
     return d.clade;
   });
@@ -378,7 +383,10 @@ function updateLayout(cRoot,firstLoad=0) {
     })
   }
   updateSvg(treeRoot,firstLoad);
+  console.log("SCROLLING "+scrolling)
+  if (scrolling == 1) {
   updateScroll();
+  }
 }
 
 // Fonction principale : mise a jour du svg
@@ -888,7 +896,7 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
     .range([0, psGraphWidth]);
   // === Définition de l'échelle pour l'axe y ===
   var y = d3.scaleLinear()
-    .domain([0, maxStatJSON(resultsJSON)])
+    .domain([minStatJSON(resultsJSON), maxStatJSON(resultsJSON)])
     .range([psGraphHeight, 0]);
   // === Ajout du graphe des résultats au SVG ===
   var psGraph = svg3.append('g')
@@ -921,9 +929,23 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
       //   return d.site;
       // })
       .attr('width', function(d) { return hStep; })
-      .attr('height', function(d) { return y(0) - y(d); })
+      .attr('height', function(d) {
+      if ( y(0)>=y(d) ) {
+      return y(0) - y(d);
+      }
+      else {
+      return y(d) - y(0);
+      }
+      })
       .attr('x', function(d) { i ++; return x(i - siteOffset); })
-      .attr('y', function(d) { return y(d); })
+      .attr('y', function(d) { 
+        if ( y(0)<=y(d) ) {
+        return y(0);
+        }
+        else {
+          return y(d);
+        }
+      })
       .style('fill', function(d) {
         return getColorFromResult(d);
       })
@@ -982,7 +1004,12 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
   var seqDiv = d3.select('#svg2')
     .append('g')
     .attr('id', 'sequences-container')
-    .attr("transform", "translate(" + (margin.right - minX - 300) + "," + (margin.top - minY + 50 + psGraphHeight  + decalageY) + ")")
+    //.attr("transform", "translate(" + (margin.right - minX - 300) + "," + (margin.top - minY + 50 + psGraphHeight  + decalageY) + ")")
+    .attr("transform", function(d) {
+      //return "translate(" + (margin.right - minX - 300) + "," + (margin.top - minY + 50 + psGraphHeight  + decalageY) + ")"
+      return "translate( 0 ," + (margin.top - minY + 50 + psGraphHeight  + decalageY) + ")"
+    })
+
   // Association des données aux futurs blocs de séquences
   var seqblocks = seqDiv
     .selectAll('.seqblock')
@@ -1101,7 +1128,8 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
   var aaDiv = d3.select('#svg2')
       .append('g')
       .attr('id', 'aa-container')
-      .attr("transform", "translate(" + (margin.right - minX - 300) + "," + (margin.top - minY + 50 + psGraphHeight  + decalageY) + ")")
+      //.attr("transform", "translate(" + (margin.right - minX - 300) + "," + (margin.top - minY + 50 + psGraphHeight  + decalageY) + ")")
+      .attr("transform", "translate( 0," + (margin.top - minY + 50 + psGraphHeight  + decalageY) + ")")
     var aablock =
       aaDiv.selectAll(".aa_block")
       .data(aa_dataset);
@@ -1155,7 +1183,9 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
       var dnaDiv = d3.select('#svg2')
         .append('g')
         .attr('id', 'dna-container')
-        .attr("transform", "translate(" + (margin.right - minX - 300) + "," + (margin.top - minY + 50 + psGraphHeight  + decalageY) + ")")
+       // .attr("transform", "translate(" + (margin.right - minX - 300) + "," + (margin.top - minY + 50 + psGraphHeight  + decalageY) + ")")
+       .attr("transform", "translate(0 ," + (margin.top - minY + 50 + psGraphHeight  + decalageY) + ")")
+ 
       var dnablock =
         dnaDiv.selectAll(".dna_block")
         .data(dna_dataset);
@@ -1264,25 +1294,26 @@ function getColorFromResult(res) {
       return psThresholdHighBgColor;
     } else if (res >= psThresholdLow) {
       return psThresholdLowBgColor;
-    } else if (res >= 0) {
+    } else if (res != 0) {
       return psBelowThresholdBgColor;
     } else {
       return psMissingBgColor;
     }
   } else {
-    if (res >= 0) {
-      if (res <= psThresholdLow) {
-        return psThresholdHighBgColor;
-      } else if (res <= psThresholdHigh) {
+    if (res <= psThresholdLow) {
+      return psThresholdHighBgColor;
+    } else if (res <= psThresholdHigh) {
         return psThresholdLowBgColor;
-      } else {
-        return psBelowThresholdBgColor;
-      }
     } else {
-      return psMissingBgColor;
+        if (res != 0) {
+          return psBelowThresholdBgColor;
+        } else {
+          return psMissingBgColor;
+        }
     }
   }
-}
+  }
+  
 // Renvoie l'opacite associee au taux
 // ----------------------------------
 function getOpacFromResult(res) {
@@ -1327,11 +1358,6 @@ function maxStatJSON(jsonResultsList) {
         currentmax = res;
       }
     });
-    if (currentmax >= 2) {
-      return 2;
-    } else {
-      return currentmax;
-    }
     return currentmax;
   }
 // Fonction de calcul de la statistique minimale dans les résultats
@@ -1343,11 +1369,7 @@ function minStatJSON(jsonResultsList) {
         currentmin = res;
       }
     });
-    if (currentmin <= 0) {
-      return currentmin;
-    } else {
-      return 0;
-    }
+    return currentmin;
   }
 // Couleur des noeuds et branches de l'arbre selon le taux
 // -------------------------------------------------------
@@ -1949,6 +1971,8 @@ $('#action').on('click', function(event, dropdownData) {
       break;
     default:
   }
+console.log("DEBUG "+action);
+updateLayout(cladeRoot,0,0);
 });
 $('#globalcollapse').on('click', function(event, dropdownData) {
   treeRoot = d3.hierarchy(cladeRoot, function(d) {

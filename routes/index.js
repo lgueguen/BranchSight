@@ -68,12 +68,10 @@ router.post("/upload_files", upload.fields([
   var resultsType = req.body.resultsType;
   var branchSite;
   var logBranchLength = req.body.logBranchLength;
-  var skipMissingSites = req.body.skipMissingSites;
   var isNuc = req.body.isNuc;
 
   isNuc = (isNuc != undefined ? true : false);
   logBranchLength = (logBranchLength != undefined ? true : false);
-  skipMissingSites = (skipMissingSites != undefined ? true : false);
   branchSite = (resultsType == 'branchSiteMode' ? true : false);
   
   // Generate XML file from data
@@ -85,8 +83,7 @@ router.post("/upload_files", upload.fields([
       +' -o '+xml_dir+fname_xml
       +' -e "\''+statcol+'\'"'
       +' -n '+nostat
-      +(branchSite?' -b ':'')
-      +(skipMissingSites?' --skipmissing ':''),
+      +(branchSite?' -b ':''),
   (error, stdout, stderr) => {
     if (error) {
       console.log(`error: ${error.message}`);

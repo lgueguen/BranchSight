@@ -150,9 +150,8 @@ def nucToAmino(nuc_seq:str):
     return aa
 
 
-def loadAlignment(alignmentFile):
-    '''Loads a FASTA alignment.'''
-
+def loadAlignment(alignmentFile, sites):
+    '''Loads a FASTA alignment with sites (starting at position 0)'''
     alignmentDict = {}
     maxSeqIdLength = 0
     with open(alignmentFile, 'r') as af:
@@ -168,82 +167,88 @@ def loadAlignment(alignmentFile):
                     alignmentDict[seq_id] = aligned_seq
                 else:
                     alignmentDict[seq_id] += aligned_seq
-    return alignmentDict, maxSeqIdLength
+
+    ## Take only assigned sites
+    lenseq=len(alignmentDict[list(alignmentDict.keys())[0]])
+
+    ## Guess is codon sequence or not
+    Msites = max(sites)
+    if Msites>=lenseq/3:
+      isCodon=False # Unsafe:perhaps to few sites to detect non-coding sequence
+    elif Msites<=lenseq:
+      isCodon=True                
+    else:
+      sys.exit("Mismatch lengths between alignment (" + str(lenseq) + ") and sites (" + str(Msites) + ")")
+
+    if not isCodon:
+      lsites = sites
+    else:
+      lsites = [y  for x in sites for y in [3*x,3*x+1,3*x+2]]
+      
+    alignmentDict2 = {}
+    for name, seq in alignmentDict.items():
+      alignmentDict2[name]="".join([seq[x] for x in lsites])
+      
+    return alignmentDict2, maxSeqIdLength
 
 
-def loadResultsSites(resultsFile, exprcol="'[1]'", nostat_value=-1.0, skipMissingSites=False):
-    '''Loads site results from formula exprcol on columns.'''
+def loadResultsSites(resultsFile, exprcol="'[1]'"):
+    '''Loads site results from formula exprcol on columns.
+    Returns list of results, list of sites (starting with 0)
+    '''
 
     if len(exprcol)>30:
       return
     expr=exprcol[1:-1].replace("[","float(line[")
     expr=expr.replace("]","])")
-    resultsDict = {}
+    resultsList = []
+    siteList =[]
     with open(resultsFile, 'r') as f:
-        i = -1
         for line in f:
             line = line.strip().split()
-            if re.search('^[0-9]+$', line[0]): # results line
+            lp = re.findall('[0-9]+', line[0]) # results line
+            if len(lp)!=0:
                 try:
-                    site = int(line[0])
+                    site = int(lp[0])-1
                     res = float(eval(expr))
                 except ValueError:
                     print(f"Conversion failed in line {line}")
                 else:
-                    if i == -1:
-                        i = site
-                    while i < site and i < MAX_SITE:
-                        # in case there is no statistic for
-                        # a site, give it a default value
-                        if not skipMissingSites:
-                            # print(f'Site {i} missing ({site})')
-                            resultsDict[i] = nostat_value
-                        i += 1
-                    resultsDict[i] = res
-            i += 1
+                    resultsList.append(res)
+                    siteList.append(site)
 
-    resultsList = []
-    for key, item in resultsDict.items():
-        resultsList.append(item)
-    return resultsList
+    return resultsList, siteList
 
 
-def loadResultsBranchSite(resultsFile, nostat_value=-1.0, skipMissingSites=False):
-    '''Loads branch-site results.'''
+def loadResultsBranchSite(resultsFile):
+    '''Loads branch-site results.
+    Returns dict of lists of results, list of sites (starting with 0)
+    '''
 
     col_lists = []
+
     with open(resultsFile, 'r') as f:
       col_headers=f.readline().strip().split()[1:]
       nbcol=len(col_headers)
       col_lists=[[] for i in range(nbcol)]
-
-      numl = -1
+      siteList=[]
+      
       for line in f:
         line = line.strip().split()
-        site = int(line[0].strip("[]"))
-
-        ## line: ['0', '0.25866598', '0.66856214', '0.19517522', ...]
-        if numl==-1:
-          numl=site
-        if not skipMissingSites:
-          while numl < site and numl < MAX_SITE:
-          # in case there is no statistic for
-          # a site, give it a default value
+        lp = re.findall('[0-9]+', line[0]) # results line
+        if len(lp)!=0:
+          try:
+            siteList.append(int(lp[0])-1)
             for i in range(nbcol):
-              col_lists[i].append(nostat_value)
-            numl += 1
-        else:
-          numl=site
-
-        for i in range(nbcol):
-          col_lists[i].append(line[i+1])
-
-        numl+=1
+              col_lists[i].append(float(line[i+1]))
+          except ValueError:
+            print(f"Conversion failed in line {line}")
 
     d_cols = {}
+
     for i in range(len(col_lists)):
       d_cols[col_headers[i]] = col_lists[i]
-
+      
       ## col_lists: [['0.00885554', '0.25866598', '0.03920189'], ...]
       ## d_cols {'38': ['0.00885554', '0.25866598', '0.03920189'], ...}
 
@@ -252,20 +257,16 @@ def loadResultsBranchSite(resultsFile, nostat_value=-1.0, skipMissingSites=False
     for col_key in d_cols:
       ## For every branch
       if re.search(r'^[0-9]+$', col_key):
-        col_text = ''
-        ## Add each result to the text
-        for i in range(nbs):
-          col_text += f'{d_cols[col_key][i]}, '
-          ## col_text: '0.1248, 0.12381, ...'
-          ## Add brackets for JSON format
-        col_text = '['+col_text[:-2]+']' # [:-2] to remove last space and comma
-        d_cols_2[col_key] = col_text
+        ## col_text: '0.1248, 0.12381, ...'
+        ## Add brackets for JSON format
+        d_cols_2[col_key] = '[' + ",".join([str(d_cols[col_key][i]) for i in range(nbs)]) + "]"
+
         ## d_cols_2: {1: '[0.1248, 0.12381, ...]', ...}
 
     nb_branches = len(col_lists)
     print(nb_branches, 'branches found in results')
 
-    return d_cols_2
+    return d_cols_2, siteList
 
 
 def getColnames(file):
@@ -402,16 +403,16 @@ def createPhyloXML(fam,newick,results):
                 if cds in seqdefdico:
                     leaf.set('definition', seqdefdico[cds])
 
-            ## Add sequence to leaf
+            ## Add sequence to 'leaf
             if lenres==lenseq/3:
                 isCodon="true"
                 leaf.set('dnaAlign', seq_alg) # coding sequence
                 leaf.set('aaAlign', nucToAmino(seq_alg)) # translated sequence
-            elif lenres==lenseq:
+            elif lenres<=lenseq:
                 isCodon="false"                
                 leaf.set('aaAlign', seq_alg) # raw sequence (any type)
             else:
-                sys.exit("Mismatch lengths between alignment " + str(lenseq) + " and sites " + str(lenres))
+                sys.exit("Mismatch lengths between alignment (" + str(lenseq) + ") and sites (" + str(lenres) + ")")
 
             evrec.append(leaf)
             element.append(evrec)
@@ -424,14 +425,14 @@ def createPhyloXML(fam,newick,results):
                 ## Look for the column with header <branch_id> in the results
                 branch_info = etree.Element('branch_info')
                 branch_info.set('id', branch_id)
-                branch_info.set('results', str(dict_results[branch_id]))
+                branch_info.set('results', str(results[branch_id]))
                 element.append(branch_info)
             except KeyError:
                 ## If there is no matching column is results, add one with negative results
                 print(f'Branch ID {branch_id} not found, adding placeholder')
                 branch_info = etree.Element('branch_info')
                 branch_info.set('id', branch_id)
-                dummy_col = json.loads(dict_results['0'])
+                dummy_col = json.loads(results['0'])
                 dummy_col = [-1.0 for _ in range(len(dummy_col))]
                 col_str = json.dumps(dummy_col)
                 branch_info.set('results', col_str)
@@ -477,20 +478,20 @@ def createPhyloXML(fam,newick,results):
 MAX_SITE = 100000
 sys.setrecursionlimit(15000)
 
+print ("Loading results... ")
+sites=[]
+if not args.isBranchsite:
+  results, sites = loadResultsSites(args.resultsFile, args.exprcol)
+else:
+  results, sites = loadResultsBranchSite(args.resultsFile)
+
+print("Results read")
+
 print ("Loading alignment... ")
-loadedAlignment = loadAlignment(args.alignmentFile)
+loadedAlignment = loadAlignment(args.alignmentFile, sites)
 alignmentDict, maxSeqIdLength = loadedAlignment[0], loadedAlignment[1]
 print ("OK")
 
-print ("Loading results... ")
-if not args.isBranchsite:
-  results =  loadResultsSites(args.resultsFile, args.exprcol, args.nostat, skipMissingSites=args.skipMissingSites)
-else:
-  results = loadResultsBranchSite(args.resultsFile)
-
-if args.isBranchsite:
-  dict_results = loadResultsBranchSite(args.resultsFile)
-print("OK")
 
 # Creates empty phyloxml document
 # project = Phyloxml()  # uncomment to have a unique xml file
