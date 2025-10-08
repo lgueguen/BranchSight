@@ -162,7 +162,7 @@ def loadAlignment(alignmentFile, sites):
                     maxSeqIdLength = len(seq_id)
                 alignmentDict[seq_id] = ''
             else: # sequence
-                aligned_seq = line.strip('\n')
+                aligned_seq = line.strip('\n').upper()
                 if len(alignmentDict[seq_id]) == 0:
                     alignmentDict[seq_id] = aligned_seq
                 else:
