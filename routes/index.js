@@ -86,7 +86,8 @@ router.post("/upload_files", upload.fields([
       +(branchSite?' -b ':''),
   (error, stdout, stderr) => {
     if (error) {
-      console.log(`error: ${error.message}`);
+        console.log(`error: ${error.message}`);
+//        error.message = error.stack;
       res.render('error.ejs', {message:"Error during phyloxml generation.",error:error});
     } else {
       if (fileRemoval) {

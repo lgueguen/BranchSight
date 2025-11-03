@@ -150,7 +150,7 @@ def nucToAmino(nuc_seq:str):
     return aa
 
 
-def loadAlignment(alignmentFile, sites):
+def loadAlignment(alignmentFile, sites = []):
     '''Loads a FASTA alignment with sites (starting at position 0)'''
     alignmentDict = {}
     maxSeqIdLength = 0
@@ -171,6 +171,9 @@ def loadAlignment(alignmentFile, sites):
     ## Take only assigned sites
     lenseq=len(alignmentDict[list(alignmentDict.keys())[0]])
 
+    if sites==[]:
+      sites= list(range(lenseq))
+      
     ## Guess is codon sequence or not
     Msites = max(sites)
     if Msites>=lenseq/3:
@@ -212,7 +215,7 @@ def loadResultsSites(resultsFile, exprcol="'[1]'"):
                     site = int(lp[0])-1
                     res = float(eval(expr))
                 except ValueError:
-                    print(f"Conversion failed in line {line}")
+                    raise OSError(f"Conversion failed in line {line}")
                 else:
                     resultsList.append(res)
                     siteList.append(site)
@@ -242,7 +245,7 @@ def loadResultsBranchSite(resultsFile):
             for i in range(nbcol):
               col_lists[i].append(float(line[i+1]))
           except ValueError:
-            print(f"Conversion failed in line {line}")
+            raise OSError(f"Conversion failed in line {line}")
 
     d_cols = {}
 
@@ -253,7 +256,10 @@ def loadResultsBranchSite(resultsFile):
       ## d_cols {'38': ['0.00885554', '0.25866598', '0.03920189'], ...}
 
     d_cols_2 = dict(d_cols)
-    nbs=len(d_cols['0'])
+    try:
+      nbs=len(d_cols['0'])
+    except KeyError:
+      raise OSError("Bad format for branch-site values file.")
     for col_key in d_cols:
       ## For every branch
       if re.search(r'^[0-9]+$', col_key):
@@ -305,6 +311,9 @@ def cleanTree(tree:str):
 def createPhyloXML(fam,newick,results):
     newick = cleanTree(newick)
 
+    ##### Ancestral Sequence Reconstruction
+
+    
     # Parse and return exactly one tree from the given file or handle
     if not ':' in newick:
         nv_arbre = ""
@@ -373,49 +382,57 @@ def createPhyloXML(fam,newick,results):
     for element in clade[0].iter('clade'):
         # look for a <name> element in the current <clade> element
         enom = element.find('name')
-        if (enom is not None):
-            # if there is a <name> element, it means we're in a leaf
-            nbfeuille = nbfeuille + 1
-            cds = enom.text
-            sp = dico.get(cds)
-            if (not  sp):
-                print ("undefined species for "+ cds)
-                sp = "undefined"
+        if enom is None:
+          node_name = etree.Element("name")
+          node_name.text = "N"+element.find('closing_order').text
+          element.insert(0,node_name)
+          enom = node_name
+          
+        # if there is a <name> element, it means we're in a leaf
+        nbfeuille = nbfeuille + 1
+        cds = enom.text
+        sp = dico.get(cds)
+        if (not  sp):
+          print ("undefined species for "+ cds)
+          sp = "undefined"
 
-            famspecies[sp] = 1
+        famspecies[sp] = 1
 
-            ## Find sequence for current leaf name
-            seq_alg = alignmentDict.get(cds)
-            if not seq_alg:
-                print ("undefined alignment for "+ cds)
-                seq_alg = ""
-            else:
-              if lenseq==0:
-                lenseq=len(seq_alg)
-              elif lenseq!=len(seq_alg):
-                print ("sequences of different length for "+ cds)
-                seq_alg = ""
+        ## Find sequence for current leaf name
+        seq_alg = alignmentDict.get(cds)
+        if not seq_alg:
+          print ("undefined alignment for "+ cds)
+          seq_alg = ""
+        else:
+          if lenseq==0:
+            lenseq=len(seq_alg)
+          elif lenseq!=len(seq_alg):
+            print ("sequences of different length for "+ cds)
+            seq_alg = ""
 
-            evrec = etree.Element("eventsRec")
-            leaf = etree.Element("leaf")
-            leaf.set('speciesLocation', sp)
-            if 'seqdefdico' in globals():
-                if cds in seqdefdico:
-                    leaf.set('definition', seqdefdico[cds])
+        evrec = etree.Element("eventsRec")
+        leaf = etree.Element("leaf")
+        leaf.set('speciesLocation', sp)
+        if 'seqdefdico' in globals():
+          if cds in seqdefdico:
+            leaf.set('definition', seqdefdico[cds])
 
-            ## Add sequence to 'leaf
-            if lenres==lenseq/3:
-                isCodon="true"
-                leaf.set('dnaAlign', seq_alg) # coding sequence
-                leaf.set('aaAlign', nucToAmino(seq_alg)) # translated sequence
-            elif lenres<=lenseq:
-                isCodon="false"                
-                leaf.set('aaAlign', seq_alg) # raw sequence (any type)
-            else:
-                sys.exit("Mismatch lengths between alignment (" + str(lenseq) + ") and sites (" + str(lenres) + ")")
+        ## Add sequence to 'leaf
+        if len(seq_alg)==0:
+          continue
+        
+        if lenres==lenseq/3:
+          isCodon="true"
+          leaf.set('dnaAlign', seq_alg) # coding sequence
+          leaf.set('aaAlign', nucToAmino(seq_alg)) # translated sequence
+        elif lenres<=lenseq:
+          isCodon="false"                
+          leaf.set('aaAlign', seq_alg) # raw sequence (any type)
+        else:
+          sys.exit("Mismatch lengths between alignment (" + str(lenseq) + ") and sites (" + str(lenres) + ")")
 
-            evrec.append(leaf)
-            element.append(evrec)
+        evrec.append(leaf)
+        element.append(evrec)
 
     ## Match branch IDs and branch results, then add branch info
     if args.isBranchsite:
@@ -524,7 +541,7 @@ for line in treefile:
       xmloutputfile.write(phyloxmltree)
       print("Tree OK")
     except ValueError:
-      sys.exit("Mismatch lengths")
+      raise OSError("Mismatch lengths between values & alignment.")
 
 treefile.close()
 xmloutputfile.close()
