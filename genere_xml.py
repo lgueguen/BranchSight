@@ -266,7 +266,6 @@ def ASR_compute(alignmentFile, treeFile):
   tree = asr.ASR_Node()
 
   tree.read_nf(treeFile, True)
-  tree.complete_internal_labels()
   
   ## set sequences
   align = loadAlignment(alignmentFile)[0]
