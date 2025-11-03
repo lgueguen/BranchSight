@@ -26,6 +26,8 @@ from Bio import Phylo
 from io import StringIO
 from math import *
 
+import asr
+
 from lxml import etree
 from xml.etree import ElementTree
 from xml.dom import minidom
@@ -47,10 +49,6 @@ parser.add_argument('-r', '--results', dest='resultsFile', action='store',\
 parser.add_argument('-o', '--output', dest='output', action='store',\
     help='Name of the output XML file (if not specified, the XML will have \
     the same name as the tree file)')
-## Other parameters
-# parser.add_argument('-c', '--col', dest='statcol', action='store', type=int,\
-#     default=1,\
-#     help='Index of the results column to use')
 parser.add_argument('-e', '--exp', dest='exprcol', action='store', type=str,\
     default=1,\
     help='Formula to be applied on the column values')
@@ -68,25 +66,6 @@ parser.add_argument('--skipmissing', dest='skipMissingSites', action='store_true
     help='Prevent the addition of special values (-n, --nostat) for sites that are absent from the results file. \
         This results in sites being next to each other on the graph even though their positions are distant.')
 args = parser.parse_args()
-
-
-def loadDico(fileDico):
-    """
-    Fonction qui prend un fichier d'alignement en entree et retourne un dictionnaire des noms d'espece des sequences
-    """
-
-    file = open(fileDico,"r")
-    speciesDico = {}
-    for line in file:
-        if line[0]==">":
-            speciesDico[line.split('>')[1].split('\n')[0]] = line.split('>')[1].split('\n')[0]
-            # tline = re.split('_',line)
-            # #key = f"{tline[0]} {tline[1]}"
-            # key = line.split('\n')[0]
-            # fin = tline[4].split("\n")[0]
-            # speciesDico[key.split(">")[1]] = f"{tline[2]} {tline[3]} {fin}"
-    file.close()
-    return speciesDico
 
 
 def geneticCode():
@@ -283,6 +262,36 @@ def getColnames(file):
     return headers
 
 
+def ASR_compute(alignmentFile, treeFile):
+  tree = asr.ASR_Node()
+
+  tree.read_nf(treeFile, True)
+  tree.complete_internal_labels()
+  
+  ## set sequences
+  align = loadAlignment(alignmentFile)[0]
+  
+  leaves = tree.get_leaves()
+  for leaf in leaves:
+    if not leaf.label() in align:
+      print("Missing seq " + leaf.label() + " in " + alignmentFile)
+    else:
+      leaf.set_sequence(align[leaf.label()])
+
+  ## Compute asr
+  tree.parsimony()
+
+  ### return dict of all sequences
+
+  dictAlign={}
+  lnodes = tree.get_all_children()
+  for node in lnodes:
+    dictAlign[node.label()] = node.get_sequence()
+
+  print(list(dictAlign.keys()))
+  return dictAlign
+
+
 def cleanTree(tree:str):
     '''Adds branch numbers to a tree.'''
 
@@ -308,12 +317,9 @@ def cleanTree(tree:str):
     return new_tree
 
 
-def createPhyloXML(fam,newick,results):
+def createPhyloXML(fam,alignmentDict,newick,results):
     newick = cleanTree(newick)
 
-    ##### Ancestral Sequence Reconstruction
-
-    
     # Parse and return exactly one tree from the given file or handle
     if not ':' in newick:
         nv_arbre = ""
@@ -379,6 +385,8 @@ def createPhyloXML(fam,newick,results):
     else:
       lenres=[len(eval(v)) for v in results.values()][0]
 
+    maxSeqIdLength = 0
+
     for element in clade[0].iter('clade'):
         # look for a <name> element in the current <clade> element
         enom = element.find('name')
@@ -391,14 +399,18 @@ def createPhyloXML(fam,newick,results):
         # if there is a <name> element, it means we're in a leaf
         nbfeuille = nbfeuille + 1
         cds = enom.text
-        sp = dico.get(cds)
+        sp = alignmentDict.get(cds)
         if (not  sp):
           print ("undefined species for "+ cds)
           sp = "undefined"
+        else:
+          if len(cds) > maxSeqIdLength:
+            maxSeqIdLength = len(cds)
 
         famspecies[sp] = 1
 
         ## Find sequence for current leaf name
+        
         seq_alg = alignmentDict.get(cds)
         if not seq_alg:
           print ("undefined alignment for "+ cds)
@@ -413,9 +425,6 @@ def createPhyloXML(fam,newick,results):
         evrec = etree.Element("eventsRec")
         leaf = etree.Element("leaf")
         leaf.set('speciesLocation', sp)
-        if 'seqdefdico' in globals():
-          if cds in seqdefdico:
-            leaf.set('definition', seqdefdico[cds])
 
         ## Add sequence to 'leaf
         if len(seq_alg)==0:
@@ -492,7 +501,6 @@ def createPhyloXML(fam,newick,results):
     # print(cleantext)
     return cleantext
 
-MAX_SITE = 100000
 sys.setrecursionlimit(15000)
 
 print ("Loading results... ")
@@ -501,22 +509,10 @@ if not args.isBranchsite:
   results, sites = loadResultsSites(args.resultsFile, args.exprcol)
 else:
   results, sites = loadResultsBranchSite(args.resultsFile)
-
 print("Results read")
 
-print ("Loading alignment... ")
-loadedAlignment = loadAlignment(args.alignmentFile, sites)
-alignmentDict, maxSeqIdLength = loadedAlignment[0], loadedAlignment[1]
-print ("OK")
-
-
-# Creates empty phyloxml document
-# project = Phyloxml()  # uncomment to have a unique xml file
-
-# Loads Species name dico
-dico = loadDico(args.alignmentFile)
-
 # Loads newick tree
+print ("Loading Tree... ")
 treefile = open(args.treeFile, "r")
 if args.output:
     output_name = args.output
@@ -525,19 +521,25 @@ else:
         output_name = args.treeFile[::-1].split('.', 1)[1][::-1]
     else:
         output_name = args.treeFile
-xmloutputfile = open(output_name,"w")
+print ("Tree read")
 
+
+# Loads alignment
+# print ("Loading alignment... ")
+# loadedAlignment = loadAlignment(args.alignmentFile, sites)
+# print ("Alignment read")
+
+
+
+# Return Alignement
+alignmentDict = ASR_compute(args.alignmentFile, args.treeFile)
+
+# xml
+xmloutputfile = open(output_name,"w")
 for line in treefile:
-    # tline = re.split(' ',line)
-    # if len(tline) > 1:
-    #     newick=tline[1]
-    #     fam=tline[0]
-    # else:
-    #     newick = tline[0]
-    #     fam = ''
     current_branch = -1
     try:
-      phyloxmltree = createPhyloXML("",line,results)
+      phyloxmltree = createPhyloXML("",alignmentDict,line,results)
       xmloutputfile.write(phyloxmltree)
       print("Tree OK")
     except ValueError:

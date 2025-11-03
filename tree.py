@@ -1,7 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-"""Newick format parser module.
+"""
+Module for tree management.
 
 Manipulates trees in the Newick format. This format is mainly used to
 describe phylogenetic binary trees but can have a much wider use. Some
@@ -117,12 +118,6 @@ class Node(object):
     a+=[self]
     return a
 
-  def get_sorted_children(self):
-    """Return the list of all nodes below the Node, including itself, ordered by decreasing depth (i.e. increasing node distance from root)."""
-    a = self.get_all_children()
-    a.sort(key=lambda x: x.depth())
-    return a
-              
   def get_all_parents(self):
     """Return the list of all nodes above the Node, excluding itself, ordered by increasing depth (i.e. decreasing node distance from root)."""
     lparents = []
@@ -189,45 +184,6 @@ class Node(object):
          st.pop(leaf)
      return st
 
-  def complete_label(self, prefix='N', labels=[], force=True):
-    """gives label to an internal node given a set of pre-existing labels in the tree"""
-    children = self.get_sorted_children()
-    for c in children:    # first builds a list of existing labels to avoid redundancy of new names
-      cl = c.label()
-      if (cl!="") and (not cl in labels):
-        labels.append(cl)
-        
-    n = 1
-    if self.label()=="" or force:
-      lab = "%s%d"%(prefix, n)
-      while lab in labels:
-        n += 1
-        lab = "%s%d"%(prefix, n)
-        self.add_label(lab)
-
-  def complete_internal_labels(self, prefix='N', labels=[], force=False):
-    """recursively gives label to internal nodes that lack one given a set of pre-existing labels in the tree"""
-    children = self.get_sorted_children()
-    for c in children:    # first builds a list of existing labels to avoid redundancy of new names
-      cl = c.label()
-      if (cl!="") and (not cl in labels):
-        labels.append(cl)
-
-    n = 1
-    for c in children:
-      try:
-        label = float(c.label())
-      except ValueError:
-        label = c.label()
-      if label=="" or force or type(label) is float:
-        lab = "%s%d"%(prefix, n)
-        while lab in labels:
-          n += 1
-          lab = "%s%d"%(prefix, n)
-        c.add_label(lab)
-        labels.append(lab)
-        n += 1    
-                      
 #####################################################
 ############## methods for access to object's child atributes:
 
@@ -653,8 +609,6 @@ class Node(object):
   def lengths_on_path_to(self, n, excludeLeaves=False):
     """returns list of branch bootstraps on the path from the Node to node $1"""
     treePath = self.path_to(n)
-          #    for node in treePath:
-          #      print node.label(),
     llg = []
     for i in range(1, len(treePath)):
       if treePath[i-1].depth() > treePath[i].depth():
@@ -738,67 +692,69 @@ class Node(object):
 
     """
     
-    x=0
-    pcomas=[] #cutting points for nodes of the same depth
-    for i in range(len(s)):
-      if s[i]=='(':
-        x+=1
-      elif s[i]==')':
-        x-=1
-      elif x==0 and s[i]==',':
-        pcomas+=[i]
+    fp = s.find("(")
+    pcomas=[] #cutting points for children
+    if fp!=-1:  # at least a chil
+      x=0
+      for i in range(fp,len(s)):
+        if s[i]=='(':
+          x+=1
+        elif s[i]==')':
+          x-=1
+        elif x==1 and s[i]==',':
+          pcomas+=[i]
+        if x==0:
+          break
 
-    if pcomas==[]: # Comment level
-      pare=s.rfind(")")
-      semicol=s.find(':',pare+1)
-      bracke=s.rfind(']')
-      brackd=s.rfind('[',0,bracke)
-
-      if bracke>pare:  # there are comments
-        self.read_commented_lab(s[brackd:bracke+1])
-      else:
-        brackd=len(s)
-
-      if semicol!=-1 and semicol<brackd : # there is a length
-        try:
-          self.__l=float(s[semicol+1:brackd])
-        except ValueError:
-          raise ValueError("Incorrect branch value -> must be numerical.")
-      else:
-        semicol=len(s)
-
-      if not self.__lab:
-        self.__lab=s[pare+1:min(semicol,brackd)]
-
-      try:
-        x=float(self.__lab)
-        self.__lab="N"+str(len(nodeId))
-      except ValueError:
-        pass
-      
-      if s[0]=="(":  #fetch children
-        nodeId.append(0)
-        self._parser(s[1:pare],nodeId)
-
-      return
-
-    ### children level
-    if len(pcomas)==0:
-      return
-
-    pcomas.append(len(s))
+      pcomas.append(i)
     
-    d=0
-    for pcom in pcomas:
-      child=s[d:pcom]
-      d=pcom+1
-      nnode = self.newnode()
-      nnode.__father=self
-      nodeId.append(0)
-      nnode._parser(child,nodeId)
-      self.__children.append(nnode)
+      ### get children
+      d=fp+1
+      for pcom in pcomas:
+        child=s[d:pcom]
+        d=pcom+1
+        nnode = self.newnode()
+        nnode.__father=self
+        nnode._parser(child,nodeId)
+        self.__children.append(nnode)
 
-        
+      pare=i
+    else:
+      pare=-1
+      
+    ### node description
+
+    semicol=s.find(':',pare+1)
+    bracke=s.rfind(']')
+    brackd=s.rfind('[',0,bracke)
+
+    if bracke>pare:  # there are comments
+      self.read_commented_lab(s[brackd:bracke+1])
+    else:
+      brackd=len(s)
+
+    if semicol!=-1 and semicol<brackd : # there is a length
+      try:
+        self.__l=float(s[semicol+1:brackd])
+      except ValueError:
+        raise ValueError("Incorrect branch value -> must be numerical.")
+    else:
+      semicol=len(s)
+
+    if not self.__lab:
+      self.__lab=s[pare+1:min(semicol,brackd)]
+      
+    if self.__lab=="":
+      self.__lab="0"
+    try:
+      x=float(self.__lab)
+      self.__lab="N"+str(len(nodeId))
+    except ValueError:
+      pass
+
+    nodeId.append(0)
+
+    
   def parser(self, s, keep_comments=False):
     """Fill the Node's attributes from parsing $1 string.
     
@@ -824,8 +780,6 @@ class Node(object):
                           
     if s:
       self._parser(s)
-      #      if self==self.go_root():
-      #        self.__l = 0 # sets distance above root at 0.
     else:
       raise ValueError("This should not have happened! Check behind your back.")
 
