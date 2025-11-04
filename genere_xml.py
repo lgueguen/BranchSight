@@ -410,7 +410,7 @@ def createPhyloXML(fam,alignmentDict,newick,results):
         
         seq_alg = alignmentDict.get(sp)
         if not seq_alg:
-          print ("undefined alignment for "+ sp^)
+          print ("undefined alignment for "+ sp)
           seq_alg = ""
         else:
           if lenseq==0:
