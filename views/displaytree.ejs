@@ -340,8 +340,12 @@ function updateLayout(cRoot,firstLoad=0,scrolling=1) {
   // Remplissage du dico nom de sequence => tableau de couleurs
   if ((firstLoad == 1) ||  (firstLoad == 2)) {
     var nodes_ini = treeRoot.descendants()
+    // var leaves_ini = nodes_ini.filter(function (e) {
+    //   return !e.children;
+    // });
+    // On regarde tous les noeuds, pas que les feuilles
     var leaves_ini = nodes_ini.filter(function (e) {
-      return !e.children;
+      return true;
     });
     var leaves_sequences = leaves_ini.filter(function(d) {return (d.data.lastEvent.aaAlign);});
     leaves_sequences.forEach (function (d,i) {
@@ -352,6 +356,7 @@ function updateLayout(cRoot,firstLoad=0,scrolling=1) {
       var dna_sequence = d.data.lastEvent.dnaAlign;
       var aa_sequence = d.data.lastEvent.aaAlign;
       var aas = aa_sequence.split("");
+      console.log("AA "+aa_sequence)
       aas.forEach (function (aa,j) {
         var col = hslaa[aa];
         if (col == undefined) {
@@ -699,11 +704,11 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
     .transition()
     .attr("y", function(d) {
       // return d.children ? -8 : 3;
-      return d.children ? 0 : 4;
+      return d.children ? -8 : 4;
     })
     .attr("x", function(d) {
       // return d.children ? -8 : 8;
-      return d.children ? 0 : 12;
+      return d.children ? -8 : 12;
     })
     .style("text-anchor", function(d) {
       return d.children ? "end" : "start";
@@ -716,6 +721,7 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
         }
       }
       if (d.data.name && options.includes("name") && d.data.lastEvent.eventType === "leaf") {
+      //if (d.data.name && options.includes("name") ) {  
         if (d.data.lastEvent && d.data.lastEvent.crossref) {
           var cross=d.data.lastEvent.crossref;
           if (selectedCrossref !== null) {
@@ -780,6 +786,11 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
   var leaves = nodes.filter(function (e) {
     return !e.children;
   });
+  var internal_nodes = nodes.filter(function (e) {
+    flag = !e.children;
+    return !flag;
+  }); 
+  console.log("internal "+internal_nodes) 
   var widthSVG0 = resultsJSON.length;
   var heightSVG0 = 60;
   var psGraphGlobalWidth = resultsJSON.length;
@@ -988,6 +999,8 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
   seq_dataset = [];
   // var leaves_sequences = leaves.filter(function(d) {return (isNuc ? d.data.lastEvent.dnaAlign : d.data.lastEvent.aaAlign);});
   var leaves_sequences = leaves.filter(function(d) {return (d.data.lastEvent.aaAlign);});
+  var leaves_sequences = leaves.filter(function(d) {return (true);});
+  // console.log("debug leave "+ d.data.name)
     leaves_sequences.forEach (function (d,i) {
       var leaf_name = d.data.lastEvent.name;
       var dna_sequence = d.data.lastEvent.dnaAlign;
@@ -1001,6 +1014,28 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
       };
       seq_dataset.push(locnode);
     });
+    
+  var internal_sequences = internal_nodes.filter(function(d) {return (true);});
+  internal_nodes.forEach (function (d,i) {
+    console.log("debug inter "+ d.data.name)
+    console.log("debug inter "+ d.data.nbseqspe.nbSeq)
+    // if d.data.nodeinfo === "collapsed"
+    if (d.data.nodeinfo) {
+      console.log("debug inter "+ d.data.name)
+    }
+    var leaf_name = d.data.lastEvent.name;
+    var dna_sequence = d.data.lastEvent.dnaAlign;
+    var aa_sequence = d.data.lastEvent.aaAlign;
+    var lengthmax=d.data.lastEvent.lengthMax;
+    var locnode = {
+      name:d.data.name,
+      y:d.y,
+      dna:d.data.lastEvent.dnaAlign,
+      aa:d.data.lastEvent.aaAlign,
+    };
+    // seq_dataset.push(locnode);
+    
+  });  
   var seqDiv = d3.select('#svg2')
     .append('g')
     .attr('id', 'sequences-container')
@@ -1080,35 +1115,40 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
     var index = i;
     var seqname =  d.data.name;
     var aas = dico_aa[seqname];
-    aas.forEach (function (aa,j) {
-      var opac =  getOpacFromResult(resultsJSON[j]);
-      var locnode = {
-        index:i,
-        name:d.data.name,
-        y:d.y,
-        pos:j,
-        col:aa,
-        opac:opac,
-      };
-      if (displaySeqType == 'AA') {
-        aa_dataset.push(locnode);
-      }
-      })
-      var dnas = dico_dna[seqname];
-      dnas.forEach (function (dna,j) {
+    console.log("AA2 "+aas)
+    if (aas != undefined) {
+      aas.forEach (function (aa,j) {
         var opac =  getOpacFromResult(resultsJSON[j]);
         var locnode = {
-        index:i,
-        name:d.data.name,
-        y:d.y,
-        pos:j,
-        col:dna,
-        opac:opac,
-      };
-      if (displaySeqType == 'Nuc') {
-        dna_dataset.push(locnode);
-      }
-      })
+          index:i,
+          name:d.data.name,
+          y:d.y,
+          pos:j,
+          col:aa,
+          opac:opac,
+        };
+        if (displaySeqType == 'AA') {
+          aa_dataset.push(locnode);
+        }
+        })
+    }
+      var dnas = dico_dna[seqname];
+      if (dnas != undefined) {
+        dnas.forEach (function (dna,j) {
+          var opac =  getOpacFromResult(resultsJSON[j]);
+          var locnode = {
+          index:i,
+          name:d.data.name,
+          y:d.y,
+          pos:j,
+          col:dna,
+          opac:opac,
+        };
+        if (displaySeqType == 'Nuc') {
+          dna_dataset.push(locnode);
+        }
+        })
+    }
     });
   console.log("aa_dataset and dna_dataset OK");
   seqTextAA.append('text')
