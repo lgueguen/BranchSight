@@ -340,8 +340,12 @@ function updateLayout(cRoot,firstLoad=0,scrolling=1) {
   // Remplissage du dico nom de sequence => tableau de couleurs
   if ((firstLoad == 1) ||  (firstLoad == 2)) {
     var nodes_ini = treeRoot.descendants()
+    // var leaves_ini = nodes_ini.filter(function (e) {
+    //   return !e.children;
+    // });
+    // On regarde tous les noeuds, pas que les feuilles
     var leaves_ini = nodes_ini.filter(function (e) {
-      return !e.children;
+      return true;
     });
     var leaves_sequences = leaves_ini.filter(function(d) {return (d.data.lastEvent.aaAlign);});
     leaves_sequences.forEach (function (d,i) {
@@ -352,6 +356,7 @@ function updateLayout(cRoot,firstLoad=0,scrolling=1) {
       var dna_sequence = d.data.lastEvent.dnaAlign;
       var aa_sequence = d.data.lastEvent.aaAlign;
       var aas = aa_sequence.split("");
+      console.log("AA "+aa_sequence)
       aas.forEach (function (aa,j) {
         var col = hslaa[aa];
         if (col == undefined) {
@@ -1110,35 +1115,40 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
     var index = i;
     var seqname =  d.data.name;
     var aas = dico_aa[seqname];
-    aas.forEach (function (aa,j) {
-      var opac =  getOpacFromResult(resultsJSON[j]);
-      var locnode = {
-        index:i,
-        name:d.data.name,
-        y:d.y,
-        pos:j,
-        col:aa,
-        opac:opac,
-      };
-      if (displaySeqType == 'AA') {
-        aa_dataset.push(locnode);
-      }
-      })
-      var dnas = dico_dna[seqname];
-      dnas.forEach (function (dna,j) {
+    console.log("AA2 "+aas)
+    if (aas != undefined) {
+      aas.forEach (function (aa,j) {
         var opac =  getOpacFromResult(resultsJSON[j]);
         var locnode = {
-        index:i,
-        name:d.data.name,
-        y:d.y,
-        pos:j,
-        col:dna,
-        opac:opac,
-      };
-      if (displaySeqType == 'Nuc') {
-        dna_dataset.push(locnode);
-      }
-      })
+          index:i,
+          name:d.data.name,
+          y:d.y,
+          pos:j,
+          col:aa,
+          opac:opac,
+        };
+        if (displaySeqType == 'AA') {
+          aa_dataset.push(locnode);
+        }
+        })
+    }
+      var dnas = dico_dna[seqname];
+      if (dnas != undefined) {
+        dnas.forEach (function (dna,j) {
+          var opac =  getOpacFromResult(resultsJSON[j]);
+          var locnode = {
+          index:i,
+          name:d.data.name,
+          y:d.y,
+          pos:j,
+          col:dna,
+          opac:opac,
+        };
+        if (displaySeqType == 'Nuc') {
+          dna_dataset.push(locnode);
+        }
+        })
+    }
     });
   console.log("aa_dataset and dna_dataset OK");
   seqTextAA.append('text')
