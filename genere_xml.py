@@ -287,7 +287,6 @@ def ASR_compute(alignmentFile, treeFile):
   for node in lnodes:
     dictAlign[node.label()] = node.get_sequence()
 
-  print(list(dictAlign.keys()))
   return dictAlign
 
 
@@ -398,7 +397,8 @@ def createPhyloXML(fam,alignmentDict,newick,results):
         # if there is a <name> element, it means we're in a leaf
         nbfeuille = nbfeuille + 1
         cds = enom.text
-        sp = alignmentDict.get(cds)
+        print(cds)
+        sp = cds
         if (not  sp):
           print ("undefined species for "+ cds)
           sp = "undefined"
