@@ -232,32 +232,34 @@ function  main_display() {
   options = stringOptions.split(",");
   // Action associee au click
   action = svgEvents.showBranchResults;
-  var stringAction = myStorage.getItem("action");
-  if ((stringAction === null )||(stringAction === undefined)||(stringAction === "undefined")){
-    stringAction = 'View Branch Results';
-    myStorage.setItem("action",stringAction);
-  }
-  switch (myStorage.getItem("action")) {
-    case 'View Branch Results':
-      action = svgEvents.showBranchResults;
-      console.log(action);  
-      break;
-    case "Switch children":
-      action = svgEvents.switchChildren;
-      console.log(action);  
-      break;
-    case "Collapse/Expand":
-      action = svgEvents.collapse;
-      console.log(action);  
-      break;
-    case "Sub Tree/Upper Tree":
-      action = svgEvents.focus;
-      console.log(action);  
-      break;
-    default:
-      console.log(action);
-      break;
-  }
+  var stringAction = 'View Branch Results';
+  myStorage.setItem("action",stringAction);
+  // var stringAction = myStorage.getItem("action");
+  // if ((stringAction === null )||(stringAction === undefined)||(stringAction === "undefined")){
+  //   stringAction = 'View Branch Results';
+  //   myStorage.setItem("action",stringAction);
+  // }
+  // switch (myStorage.getItem("action")) {
+  //   case 'View Branch Results':
+  //     action = svgEvents.showBranchResults;
+  //     console.log(action);  
+  //     break;
+  //   case "Switch children":
+  //     action = svgEvents.switchChildren;
+  //     console.log(action);  
+  //     break;
+  //   case "Collapse/Expand":
+  //     action = svgEvents.collapse;
+  //     console.log(action);  
+  //     break;
+  //   case "Sub Tree/Upper Tree":
+  //     action = svgEvents.focus;
+  //     console.log(action);  
+  //     break;
+  //   default:
+  //     console.log(action);
+  //     break;
+  // }
   console.log("DEBUG STORED ACTION "+action)
   // Largeur de l'arbre
   if (tagSimpleGene === false) {
