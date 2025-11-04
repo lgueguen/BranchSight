@@ -30,7 +30,7 @@ router.get('/', function(req, res) {
 
 // POST upload_files
 // -----------
-var fileRemoval = true;
+var fileRemoval = false;
 router.post("/upload_files", upload.fields([
   {name: 'file_t'}, 
   {name: 'file_a'}, 

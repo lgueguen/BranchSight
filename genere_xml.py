@@ -287,7 +287,6 @@ def ASR_compute(alignmentFile, treeFile):
   for node in lnodes:
     dictAlign[node.label()] = node.get_sequence()
 
-  print(list(dictAlign.keys()))
   return dictAlign
 
 
@@ -397,28 +396,27 @@ def createPhyloXML(fam,alignmentDict,newick,results):
           
         # if there is a <name> element, it means we're in a leaf
         nbfeuille = nbfeuille + 1
-        cds = enom.text
-        sp = alignmentDict.get(cds)
+        sp = enom.text
         if (not  sp):
-          print ("undefined species for "+ cds)
+          print ("undefined species for "+ sp)
           sp = "undefined"
         else:
-          if len(cds) > maxSeqIdLength:
-            maxSeqIdLength = len(cds)
+          if len(sp) > maxSeqIdLength:
+            maxSeqIdLength = len(sp)
 
         famspecies[sp] = 1
 
         ## Find sequence for current leaf name
         
-        seq_alg = alignmentDict.get(cds)
+        seq_alg = alignmentDict.get(sp)
         if not seq_alg:
-          print ("undefined alignment for "+ cds)
+          print ("undefined alignment for "+ sp)
           seq_alg = ""
         else:
           if lenseq==0:
             lenseq=len(seq_alg)
           elif lenseq!=len(seq_alg):
-            print ("sequences of different length for "+ cds)
+            print ("sequences of different length for "+ sp)
             seq_alg = ""
 
         evrec = etree.Element("eventsRec")
