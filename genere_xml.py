@@ -388,14 +388,17 @@ def createPhyloXML(fam,alignmentDict,newick,results):
     for element in clade[0].iter('clade'):
         # look for a <name> element in the current <clade> element
         enom = element.find('name')
+        node_type = "leave"
         if enom is None:
+          node_type = "internal"
           node_name = etree.Element("name")
           node_name.text = "N"+element.find('closing_order').text
           element.insert(0,node_name)
           enom = node_name
           
         # if there is a <name> element, it means we're in a leaf
-        nbfeuille = nbfeuille + 1
+        if node_type == "leave":
+          nbfeuille = nbfeuille + 1
         sp = enom.text
         if (not  sp):
           print ("undefined species for "+ sp)
@@ -420,7 +423,10 @@ def createPhyloXML(fam,alignmentDict,newick,results):
             seq_alg = ""
 
         evrec = etree.Element("eventsRec")
-        leaf = etree.Element("leaf")
+        if node_type == "leave":
+          leaf = etree.Element("leaf")
+        else:
+          leaf = etree.Element("speciation")            
         leaf.set('speciesLocation', sp)
 
         ## Add sequence to 'leaf
