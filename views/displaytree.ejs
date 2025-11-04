@@ -720,8 +720,8 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
             name += "seq:"+d.data.nbseqspe.nbSeq + " spe:"+d.data.nbseqspe.nbSpe;
         }
       }
-      // if (d.data.name && options.includes("name") && d.data.lastEvent.eventType === "leaf") {
-      if (d.data.name && options.includes("name") ) {  
+      if (d.data.name && options.includes("name") && d.data.lastEvent.eventType === "leaf") {
+      //if (d.data.name && options.includes("name") ) {  
         if (d.data.lastEvent && d.data.lastEvent.crossref) {
           var cross=d.data.lastEvent.crossref;
           if (selectedCrossref !== null) {
