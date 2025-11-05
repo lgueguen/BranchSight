@@ -266,7 +266,8 @@ def ASR_compute(alignmentFile, treeFile):
   tree = asr.ASR_Node()
 
   tree.read_nf(treeFile, True)
-  
+  tree.intersect_ancestral_labels()
+
   ## set sequences
   align = loadAlignment(alignmentFile)[0]
   
@@ -287,7 +288,7 @@ def ASR_compute(alignmentFile, treeFile):
   for node in lnodes:
     dictAlign[node.label()] = node.get_sequence()
 
-  return dictAlign
+  return dictAlign, tree.newick()
 
 
 def cleanTree(tree:str):
@@ -345,7 +346,7 @@ def createPhyloXML(fam,alignmentDict,newick,results):
     # Copies all objects in a variable and removes the created file
     text = file.read()
     file.close()
-    os.remove('tmpfile-'+rd+'.xml')
+#    os.remove('tmpfile-'+rd+'.xml')
 
     p = XMLParser(huge_tree=True)
     text = text.replace("phy:", "")
@@ -388,13 +389,10 @@ def createPhyloXML(fam,alignmentDict,newick,results):
     for element in clade[0].iter('clade'):
         # look for a <name> element in the current <clade> element
         enom = element.find('name')
-        node_type = "leave"
-        if enom is None:
+        if len(element.getchildren())>3: 
           node_type = "internal"
-          node_name = etree.Element("name")
-          node_name.text = "N"+element.find('closing_order').text
-          element.insert(0,node_name)
-          enom = node_name
+        else:
+          node_type = "leave"
           
         # if there is a <name> element, it means we're in a leaf
         if node_type == "leave":
@@ -514,18 +512,6 @@ else:
   results, sites = loadResultsBranchSite(args.resultsFile)
 print("Results read")
 
-# Loads newick tree
-print ("Loading Tree... ")
-treefile = open(args.treeFile, "r")
-if args.output:
-    output_name = args.output
-else:
-    if '.' in args.treeFile:
-        output_name = args.treeFile[::-1].split('.', 1)[1][::-1]
-    else:
-        output_name = args.treeFile
-print ("Tree read")
-
 
 # Loads alignment
 # print ("Loading alignment... ")
@@ -534,19 +520,26 @@ print ("Tree read")
 
 
 
-# Return Alignement
-alignmentDict = ASR_compute(args.alignmentFile, args.treeFile)
+# Return Alignement & tree
+alignmentDict, tree = ASR_compute(args.alignmentFile, args.treeFile)
+
 
 # xml
-xmloutputfile = open(output_name,"w")
-for line in treefile:
-    current_branch = -1
-    try:
-      phyloxmltree = createPhyloXML("",alignmentDict,line,results)
-      xmloutputfile.write(phyloxmltree)
-      print("Tree OK")
-    except ValueError:
-      raise OSError("Mismatch lengths between values & alignment.")
+if args.output:
+    output_name = args.output
+else:
+    if '.' in args.treeFile:
+        output_name = args.treeFile[::-1].split('.', 1)[1][::-1]
+    else:
+        output_name = args.treeFile
 
-treefile.close()
+xmloutputfile = open(output_name,"w")
+current_branch = -1
+try:
+  phyloxmltree = createPhyloXML("",alignmentDict,tree,results)
+  xmloutputfile.write(phyloxmltree)
+  print("Tree PhyloXml ok")
+except ValueError:
+  raise OSError("Mismatch lengths between values & alignment.")
+
 xmloutputfile.close()

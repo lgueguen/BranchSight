@@ -25,6 +25,7 @@ import copy
 import re
 from math import log
 import numpy
+import os
 
 #######################################################################
 #######################################################################
@@ -127,8 +128,6 @@ class Node(object):
       f = f.go_father()
     return lparents
               
-        
-                
   #####################################################
   ############## methods for editing object atributes:
     
@@ -184,6 +183,29 @@ class Node(object):
          st.pop(leaf)
      return st
 
+  def intersect_ancestral_labels(self):
+    """sets recursively labels of ancestral nodes as the intersection
+    of children prefixes, if the labels are different from the default
+    "N\d+".
+
+    Returns the label of this node
+
+    """
+
+    pat=re.compile("\AN\d+\Z")
+
+    labc = [child.intersect_ancestral_labels() for child in self.get_children()]
+    lok = [l for l in labc if len(pat.findall(l))==0]
+
+    prefok = os.path.commonprefix(lok)
+    prefok = prefok.strip("_:.")
+
+    if len(prefok)>=4:
+      self.add_label(prefok)
+
+    return self.label()
+    
+    
 #####################################################
 ############## methods for access to object's child atributes:
 
@@ -307,7 +329,7 @@ class Node(object):
       i+=1
       flag=False
 
-    if self.is_leaf():
+    if self.__lab and self.__lab!="":
       s+=self.__lab
       flag=True
 

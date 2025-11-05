@@ -252,6 +252,7 @@ if __name__ == "__main__":
     sys.exit(0)
   
   tree.read_nf(args.tree, True)
+  tree.intersect_ancestral_labels()
   
   align = loadAlignment(args.align)
 
