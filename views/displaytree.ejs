@@ -1984,6 +1984,7 @@ $('#action').ready(function() {
 $('#action').on('click', function(event, dropdownData) {
   var target = event.toElement || event.relatedTarget || event.target || function () { throw "Failed to attach an event target!"; }
   myStorage.setItem("action",target.text);
+  $('#button_action').text(target.text);
   switch (target.text) {
     case 'View Branch Results':
       action = svgEvents.showBranchResults;
