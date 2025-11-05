@@ -232,7 +232,7 @@ function  main_display() {
   options = stringOptions.split(",");
   // Action associee au click
   action = svgEvents.showBranchResults;
-  var stringAction = 'View Branch Results';
+  var stringAction = "View Branch Results";
   myStorage.setItem("action",stringAction);
   // var stringAction = myStorage.getItem("action");
   // if ((stringAction === null )||(stringAction === undefined)||(stringAction === "undefined")){
@@ -1966,7 +1966,7 @@ $('#selectCrossref').ready(function() {
   });
 $('#action').ready(function() {
   switch (myStorage.getItem("action")) {
-    case 'View Branch Results':
+    case "View Branch Results":
       $('#branch-res').css('color','#FF0000');
       break;
     case "Switch children":
@@ -1984,9 +1984,10 @@ $('#action').ready(function() {
 $('#action').on('click', function(event, dropdownData) {
   var target = event.toElement || event.relatedTarget || event.target || function () { throw "Failed to attach an event target!"; }
   myStorage.setItem("action",target.text);
+  console.log("DEBUG ACTION "+target.text);
   $('#button_action').text(target.text);
   switch (target.text) {
-    case 'View Branch Results':
+    case "View Branch Results":
       action = svgEvents.showBranchResults;
       $('#branch-res').css('color','#FF0000');
       $('#switch').css('color','#000000');
