@@ -2018,7 +2018,9 @@ $('#action').on('click', function(event, dropdownData) {
     default:
   }
 console.log("DEBUG "+action);
-updateLayout(cladeRoot,0,0);
+if (target.text != undefined) {
+  updateLayout(cladeRoot,0,0);
+}
 });
 $('#globalcollapse').on('click', function(event, dropdownData) {
   treeRoot = d3.hierarchy(cladeRoot, function(d) {
