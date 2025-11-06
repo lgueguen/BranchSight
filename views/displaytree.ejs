@@ -719,7 +719,7 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
       var name = "";
       if (d.data.nodeinfo) {
         if (d.data.nodeinfo.status === "collapsed") {
-            name += "seq:"+d.data.nbseqspe.nbSeq + " spe:"+d.data.nbseqspe.nbSpe;
+            name += "seq:"+d.data.nbseqspe.nbSeq + " spe:"+d.data.nbseqspe.nbSpe + " " + d.data.name ;
         }
       }
       if (d.data.name && options.includes("name") && d.data.lastEvent.eventType === "leaf") {
