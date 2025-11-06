@@ -20,6 +20,8 @@ Modified by Grégoire ALIZADEH NOIRET, 15 March 2023
       <%- include('../partials/header') %>
       <%- include('../partials/buttons') %>
     </nav>
+  </header>
+  <main>    
     <div id="navigator-container" style="border:2px solid lightgrey; overflow-y: hidden; width: 100%;">
       <svg id="svg0"></svg>
     </div>
@@ -31,8 +33,6 @@ Modified by Grégoire ALIZADEH NOIRET, 15 March 2023
         <svg id="svg3"></svg>
       </div>
     </div>
-  </header>
-  <main>
     <div id="tree-container" style="border:2px solid lightgrey; float: left; overflow-y: auto; width: 40%;">
       <svg id="svg1"></svg>
     </div>
@@ -164,6 +164,7 @@ hslaa["-"] = [0,0,100];
 hslaa["*"] = [0,0,0];
 
 var flag_redond = 1;
+var flag_histogram = 1;
 var colordna = new Object();
 var colordna_red = new Object();
 define_colordna()
@@ -802,7 +803,16 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
   svg0.attr('width', widthSVG0 + 15)
       .attr("height",psGraphGlobalHeight);
   var svg3 = d3.select('#svg3');
+  var svgbidon = d3.select('#svgbidon');
   svg3.attr("width",  50 + seq_lg + 10 + resultsJSON.length*hStep + 10 + seq_lg + 50);
+  if (flag_histogram == -1 )  {
+    svg3.attr("height",  0);
+    svgbidon.attr("height",  0);
+  }
+  else {
+        svg3.attr("height",  200);
+    svgbidon.attr("height",  200);
+  }
   d3.select('#ps-graph-global').remove();
   if (!document.getElementById('ps-graph-global')) {
     // Ajout du graphe des résultats au SVG
@@ -2106,6 +2116,11 @@ $('#redondance').on('click', function(event, dropdownData) {
     flag_redond = - flag_redond;
     console.log("REDOND "+flag_redond);
     updateLayout(cladeRoot,2);
+});
+$('#histogram').on('click', function(event, dropdownData) {
+    flag_histogram = - flag_histogram;
+    console.log("HISTO "+flag_histogram);
+    updateLayout(cladeRoot);
 });
 $('#export').on('click', function(event, dropdownData) {
   var target = event.toElement || event.relatedTarget || event.target || function () { throw "Failed to attach an event target!"; }
