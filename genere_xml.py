@@ -435,7 +435,7 @@ def createPhyloXML(fam,alignmentDict,newick,results):
           isCodon="true"
           leaf.set('dnaAlign', seq_alg) # coding sequence
           leaf.set('aaAlign', nucToAmino(seq_alg)) # translated sequence
-        elif lenres<=lenseq:
+        elif lenres==lenseq:
           isCodon="false"                
           leaf.set('aaAlign', seq_alg) # raw sequence (any type)
         else:

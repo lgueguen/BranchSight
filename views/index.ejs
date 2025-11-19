@@ -49,16 +49,16 @@ Modified by Laurent GUÉGUEN, 6 March 2023
           <!--   </div> -->
           <!-- </div> -->
           
-          <div class="row mb-3">
-            <label class="form-check-label">Results type</label>
-            <div class="btn-group input-group" role="group" aria-label="Choice between site mode and branch-site mode">
-              <input type="radio" class="btn-check" name="resultsType" id="siteMode" value="siteMode" checked>
-              <label class="btn btn-outline-secondary" for="siteMode">Site</label>
+          <!-- <div class="row mb-3"> -->
+          <!--   <label class="form-check-label">Results type</label> -->
+          <!--   <div class="btn-group input-group" role="group" aria-label="Choice between site mode and branch-site mode"> -->
+          <!--     <input type="radio" class="btn-check" name="resultsType" id="siteMode" value="siteMode" checked> -->
+          <!--     <label class="btn btn-outline-secondary" for="siteMode">Site</label> -->
 
-              <input type="radio" class="btn-check" name="resultsType" id="branchSiteMode" value="branchSiteMode">
-              <label class="btn btn-outline-secondary" for="branchSiteMode">Branch-site</label>
-            </div>
-          </div>
+          <!--     <input type="radio" class="btn-check" name="resultsType" id="branchSiteMode" value="branchSiteMode"> -->
+          <!--     <label class="btn btn-outline-secondary" for="branchSiteMode">Branch-site</label> -->
+          <!--   </div> -->
+          <!-- </div> -->
 
           <div class="row mb-2 custom-file-input">
             <label class="btn btn-light btn-sm btn-file d-flex flex-column justify-content-center">
@@ -83,10 +83,10 @@ Modified by Laurent GUÉGUEN, 6 March 2023
             </label>
           </div>
           
-          <div id="statcol-field" class="row mb-3">
-            <label for="statcol">Statistics formula</label>
-            <input id="statcol" class="form-control" type="string" name="statcol" value="[1]" required />
-          </div>
+          <!-- <div id="statcol-field" class="row mb-3"> -->
+          <!--   <label for="statcol">Statistics formula</label> -->
+          <!--   <input id="statcol" class="form-control" type="string" name="statcol" value="[1]" required /> -->
+          <!-- </div> -->
 
           <div class="row mb-2">
             <!-- <label for="nostat">Missing statistics value</label> -->
@@ -188,29 +188,29 @@ Modified by Laurent GUÉGUEN, 6 March 2023
     +'</svg>';
 
   $(document).ready(function() {
-    function updateForm() {
-      console.log('checked:', isChecked('branchSiteMode'));
-      if (isChecked('branchSiteMode')) {
-          $('#statcol-field').hide();
-          $('#statlink-bsmode').show();
-          $('#statlink-smode').hide();
-      } else {
-          $('#statcol-field').show();
-          $('#statlink-bsmode').hide();
-          $('#statlink-smode').show();
-      } 
-    }
-    function isChecked(checkboxId) {
-      return $('#'+checkboxId).is(':checked');
-    }
-    $('#branchSiteMode').ready(function(e) {
-      // console.log('branchSite ready');
-      updateForm();
-    });
-    $('#siteMode, #branchSiteMode').change(function (e) {
-      // console.log('branchSite updated');
-      updateForm();
-    });
+    // function updateForm() {
+    //   console.log('checked:', isChecked('branchSiteMode'));
+    //   if (isChecked('branchSiteMode')) {
+    //       $('#statcol-field').hide();
+    //       $('#statlink-bsmode').show();
+    //       $('#statlink-smode').hide();
+    //   } else {
+    //       $('#statcol-field').show();
+    //       $('#statlink-bsmode').hide();
+    //       $('#statlink-smode').show();
+    //   } 
+    // }
+    // function isChecked(checkboxId) {
+    //   return $('#'+checkboxId).is(':checked');
+    // }
+    // $('#branchSiteMode').ready(function(e) {
+    //   // console.log('branchSite ready');
+    //   updateForm();
+    // });
+    // $('#siteMode, #branchSiteMode').change(function (e) {
+    //   // console.log('branchSite updated');
+    //   updateForm();
+    // });
 
     $('[id$="-file-input"]').each(function(i, elt) {
       if ($('#'+elt.id).val() != '') {

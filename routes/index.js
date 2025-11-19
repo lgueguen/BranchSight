@@ -72,7 +72,7 @@ router.post("/upload_files", upload.fields([
 
   isNuc = (isNuc != undefined ? true : false);
   logBranchLength = (logBranchLength != undefined ? true : false);
-  branchSite = (resultsType == 'branchSiteMode' ? true : false);
+  branchSite = true; //(resultsType == 'branchSiteMode' ? true : false);
   
   // Generate XML file from data
   console.log('Generating PhyloXML tree');
