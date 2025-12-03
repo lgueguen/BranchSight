@@ -111,7 +111,7 @@ class Node(object):
     return self.__comment
               
   def get_all_children(self):
-    """Return the list of all nodes below the Node, including itself"""
+    """Return the list of all nodes below the Node, including itself. The order is the construction order."""
     a=[]
     if self.__children!=[]:
       for i in self.__children:

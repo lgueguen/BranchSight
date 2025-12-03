@@ -103,6 +103,7 @@ var psThresholdLowBgColor = "#FFFF00";
 var psBelowThresholdBgColor = "#DDDDDD";
 var psMissingBgColor = "#FFFFFF";
 var seq_lg = xmlparser.flatTree(recTree.phyloxml.phylogeny.maxSeqIdLength)*10;
+var isDNA = (xmlparser.flatTree(recTree.phyloxml.phylogeny.size.isDNA)=="true");
 var isCodon = (xmlparser.flatTree(recTree.phyloxml.phylogeny.size.isCodon)=="true");
 var collapseMode = 'collapseOff';
 var navWindowColor = '#000000';
@@ -1210,7 +1211,7 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
         //  transx = (d.pos)*hStep + seq_lg + 50 ;
         // }
         var transx = (d.pos)*hStep + seq_lg + 50 ;
-        if (isCodon == 0 ) {
+        if (isDNA == 1 ) {
           transx = transx - 80 ;// ???
         }
         var transy = d.y - 7 ;

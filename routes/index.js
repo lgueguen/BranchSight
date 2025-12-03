@@ -41,7 +41,12 @@ router.post("/upload_files", upload.fields([
   var currentTimestampMs = Date.now(); // Date.now() is the current timestamp in milliseconds
   var fname_t = currentTimestampMs+'-t'+req.files.file_t[0].filename.substring(0, 3);
   var fname_a = currentTimestampMs+'-a'+req.files.file_a[0].filename.substring(0, 3);
-  var fname_r = currentTimestampMs+'-r'+req.files.file_r[0].filename.substring(0, 3);
+    if (req.files.file_r){
+        var fname_r = currentTimestampMs+'-r'+req.files.file_r[0].filename.substring(0, 3);
+    } else {
+        var fname_r = "0_0";
+    }
+    
   fs.rename(req.files.file_t[0].path, upload_dir+fname_t, function(err) {
     if (err) {
       console.log('ERROR:', err);
@@ -52,12 +57,15 @@ router.post("/upload_files", upload.fields([
       console.log('ERROR:', err);
     }
   });
-  fs.rename(req.files.file_r[0].path, upload_dir+fname_r, function(err) {
-    if (err) {
-      console.log('ERROR:', err);
+    
+    if (req.files.file_r){
+        fs.rename(req.files.file_r[0].path, upload_dir+fname_r, function(err) {
+            if (err) {
+                console.log('ERROR:', err);
+            }
+        });
     }
-  });
-
+    
   var fname_xml = currentTimestampMs
     + '-'+fname_t.split('-')[1]
     + '-'+fname_a.split('-')[1]
@@ -76,10 +84,16 @@ router.post("/upload_files", upload.fields([
   
   // Generate XML file from data
   console.log('Generating PhyloXML tree');
+    if (req.files.file_r){
+        opt_r = ' -r '+upload_dir+fname_r;
+    } else {
+        opt_r = "";
+    }
+
   exec('python3 genere_xml.py'
       +' -t '+upload_dir+fname_t
       +' -a '+upload_dir+fname_a
-      +' -r '+upload_dir+fname_r
+      + opt_r
       +' -o '+xml_dir+fname_xml
       +' -e "\''+statcol+'\'"'
       +' -n '+nostat

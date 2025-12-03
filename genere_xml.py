@@ -44,7 +44,7 @@ parser.add_argument('-a', '--align', dest='alignmentFile', action='store',\
     required=True,\
     help='File containing an alignment in FASTA format')
 parser.add_argument('-r', '--results', dest='resultsFile', action='store',\
-    required=True,\
+    required=False,\
     help='File containing the results')
 parser.add_argument('-o', '--output', dest='output', action='store',\
     help='Name of the output XML file (if not specified, the XML will have \
@@ -153,14 +153,13 @@ def loadAlignment(alignmentFile, sites = []):
     if sites==[]:
       sites= list(range(lenseq))
       
-    ## Guess is codon sequence or not
-    Msites = max(sites)
-    if Msites>=lenseq/3:
-      isCodon=False # Unsafe:perhaps to few sites to detect non-coding sequence
-    elif Msites<=lenseq:
-      isCodon=True                
-    else:
-      sys.exit("Mismatch lengths between alignment (" + str(lenseq) + ") and sites (" + str(Msites) + ")")
+    ## Determination of sites if coding sequence
+    Msites = max(sites)+1
+    isCodon = False
+    if Msites == lenseq/3:
+      isCodon=True # Unsafe:perhaps to few sites to detect non-coding sequence
+    elif Msites!=lenseq:
+      sys.exit("Mismatch in lengths between alignment (" + str(lenseq) + ") and sites (" + str(Msites) + ")")
 
     if not isCodon:
       lsites = sites
@@ -171,7 +170,7 @@ def loadAlignment(alignmentFile, sites = []):
     for name, seq in alignmentDict.items():
       alignmentDict2[name]="".join([seq[x] for x in lsites])
       
-    return alignmentDict2, maxSeqIdLength
+    return alignmentDict2
 
 
 def loadResultsSites(resultsFile, exprcol="'[1]'"):
@@ -204,7 +203,7 @@ def loadResultsSites(resultsFile, exprcol="'[1]'"):
 
 def loadResultsBranchSite(resultsFile):
     '''Loads branch-site results.
-    Returns dict of lists of results, list of sites (starting with 0)
+    Returns dict of lists of results, list of sites (starting with 0, when sites in file start with 1)
     '''
 
     col_lists = []
@@ -262,14 +261,14 @@ def getColnames(file):
     return headers
 
 
-def ASR_compute(alignmentFile, treeFile):
+def ASR_compute(alignmentFile, treeFile, sites = []):
   tree = asr.ASR_Node()
 
   tree.read_nf(treeFile, True)
   tree.intersect_ancestral_labels()
 
   ## set sequences
-  align = loadAlignment(alignmentFile)[0]
+  align = loadAlignment(alignmentFile, sites)
   
   leaves = tree.get_leaves()
   for leaf in leaves:
@@ -288,7 +287,49 @@ def ASR_compute(alignmentFile, treeFile):
   for node in lnodes:
     dictAlign[node.label()] = node.get_sequence()
 
-  return dictAlign, tree.newick()
+  results = None
+  
+  ###  return dictionnary of parsimony results if sites == [] (which means nor results yet)
+
+  if sites==[]:
+    results = {} # dictionnary {node : [list of values per site]}
+    
+    lnodes = tree.get_all_children()
+
+    fout = open("test_result.txt","w")
+    fout.write("[site]")
+    for n in range(len(lnodes)):
+      fout.write("\t"+str(n))
+    fout.write("\n")
+
+    
+    lseq = len(lnodes[0].get_sequence())
+    for n in range(len(lnodes)):
+      node = lnodes[n]
+      if node.is_root():
+        results[str(n)] = '[' + ",".join(["0"]*lseq) + ']' 
+      else:
+        seq = node.get_sequence()
+        up = node.go_father().get_sequence()
+
+        results[str(n)] = '[' + ",".join([str(asr.SubsCost(up[i], seq[i])) for i in range(lseq)]) + ']'
+
+
+    for i in range(lseq):
+      fout.write("[%d]"%(i+1))
+      for n in range(len(lnodes)):
+        node = lnodes[n]
+        if node.is_root():
+          fout.write("\t0")
+        else:
+          seq = node.get_sequence()
+          up = node.go_father().get_sequence()
+
+          fout.write("\t"+str(asr.SubsCost(up[i], seq[i])))
+      fout.write("\n")
+
+    fout.close()
+  return dictAlign, tree.newick(), results
 
 
 def cleanTree(tree:str):
@@ -346,7 +387,7 @@ def createPhyloXML(fam,alignmentDict,newick,results):
     # Copies all objects in a variable and removes the created file
     text = file.read()
     file.close()
-#    os.remove('tmpfile-'+rd+'.xml')
+    os.remove('tmpfile-'+rd+'.xml')
 
     p = XMLParser(huge_tree=True)
     text = text.replace("phy:", "")
@@ -378,7 +419,6 @@ def createPhyloXML(fam,alignmentDict,newick,results):
     lenseq = 0
 
     # Check results
-
     if type(results)==type([]): # Site results
       lenres=len(results)
     else:
@@ -475,9 +515,19 @@ def createPhyloXML(fam,alignmentDict,newick,results):
     LengthMaxSeqID = etree.Element('maxSeqIdLength')
     LengthMaxSeqID.text = str(maxSeqIdLength)
 
+    ## Guess if DNA sequence or not from first sequence
+    seq  = list(alignmentDict.values())[0]
+    lnuc = sum([seq.count(b) for b in "ACGT"])
+    lind = seq.count("-")
+    
+    isDNA = ["false","true"][(lnuc/(len(seq)-lind)) > 0.5] #prot sequence with more than half letters in ATCG is unlikely
+
+
+    isDNA = "false"
     treesize =  etree.Element("size")
     treesize.set('leaves',str(nbfeuille))
-    treesize.set('isCodon',str(isCodon))
+    treesize.set('isDNA',isDNA)
+    treesize.set('isCodon',isCodon)
     e=subtree[0].find('phylogeny')
     e.append(treesize)
     e.append(LengthMaxSeqID)
@@ -502,44 +552,44 @@ def createPhyloXML(fam,alignmentDict,newick,results):
     # print(cleantext)
     return cleantext
 
-sys.setrecursionlimit(15000)
-
-print ("Loading results... ")
-sites=[]
-if not args.isBranchsite:
-  results, sites = loadResultsSites(args.resultsFile, args.exprcol)
-else:
-  results, sites = loadResultsBranchSite(args.resultsFile)
-print("Results read")
-
-
-# Loads alignment
-# print ("Loading alignment... ")
-# loadedAlignment = loadAlignment(args.alignmentFile, sites)
-# print ("Alignment read")
 
 
 
-# Return Alignement & tree
-alignmentDict, tree = ASR_compute(args.alignmentFile, args.treeFile)
 
+##########
+###
 
-# xml
-if args.output:
-    output_name = args.output
-else:
-    if '.' in args.treeFile:
-        output_name = args.treeFile[::-1].split('.', 1)[1][::-1]
-    else:
-        output_name = args.treeFile
+if __name__ == "__main__":
+  sys.setrecursionlimit(15000)
 
-xmloutputfile = open(output_name,"w")
-current_branch = -1
-try:
-  phyloxmltree = createPhyloXML("",alignmentDict,tree,results)
-  xmloutputfile.write(phyloxmltree)
-  print("Tree PhyloXml ok")
-except ValueError:
-  raise OSError("Mismatch lengths between values & alignment.")
-
-xmloutputfile.close()
+  if args.resultsFile:
+    results, sites = loadResultsBranchSite(args.resultsFile)
+    print("Results read")
+  else:
+    sites = []
+    
+  # Return Alignement & tree (&results)
+  alignmentDict, tree, resulttmp = ASR_compute(args.alignmentFile, args.treeFile, sites)
+  
+  if not args.resultsFile:
+    results = resulttmp
+  
+  # xml
+  if args.output:
+      output_name = args.output
+  else:
+      if '.' in args.treeFile:
+          output_name = args.treeFile[::-1].split('.', 1)[1][::-1]
+      else:
+          output_name = args.treeFile
+  
+  xmloutputfile = open(output_name,"w")
+  current_branch = -1
+  try:
+    phyloxmltree = createPhyloXML("",alignmentDict,tree,results)
+    xmloutputfile.write(phyloxmltree)
+    print("Tree PhyloXml ok")
+  except ValueError:
+    raise OSError("Mismatch lengths between values & alignment.")
+  
+  xmloutputfile.close()

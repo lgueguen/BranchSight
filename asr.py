@@ -215,7 +215,7 @@ class ASR_Node(Node):
 
         upcostchildren[child].append(upcostchildpos)
         
-    ## Then recursion
+   ## Then recursion
     for child in self.get_children():
       child.__compute_backward(upcostchildren[child])
 
@@ -243,14 +243,14 @@ if __name__ == "__main__":
   parser.add_argument('-o', '--output', dest='output', action='store',\
                       required=True,
                       help='Name of the output Fasta file')
+  parser.add_argument('-c', '--costs', dest='costs', action='store',\
+                      required=False,
+                      help='Name of the costs tsv file. Node numbers as columns & sites as lines.')
+  
   args = parser.parse_args()
 
   tree = ASR_Node()
 
-  if not args.tree:
-    print("Missing tree")
-    sys.exit(0)
-  
   tree.read_nf(args.tree, True)
   tree.intersect_ancestral_labels()
   
@@ -280,4 +280,33 @@ if __name__ == "__main__":
     fout.write("\n")
 
   fout.close()
-  
+
+  ### output all transition costs
+
+  if args.costs:
+    fout=open(args.costs, "w")
+    lnodes = tree.get_all_children()
+
+    fout.write("[Site]\t")
+    fout.write("\t".join([node.label() for node in lnodes]))
+               
+    lnodes = tree.get_all_children()
+    lseq = len(lnodes[0].get_sequence())
+
+    for i in range(lseq):
+      fout.write("[%d]"%(i+1))
+    
+      for node in lnodes:
+        if not node.up:
+          cost = 0
+        else:
+          seqi = node.get_sequence()[i]
+          upi = node.up.get_sequence()[i]
+
+          cost = SubsCost(upi, seqi)
+
+      fout.write("\t%f"%(cost))
+
+    fout.write("\n")
+    fout.close()
+
