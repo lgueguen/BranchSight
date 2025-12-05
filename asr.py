@@ -13,7 +13,6 @@ def SubsCost(a,b):
   """Costs for substitutions. Indels cost likewise.
 
   """
-
   if a=="*" or b=="*":
     return 1
   if a!=b:

@@ -152,7 +152,7 @@ def loadAlignment(alignmentFile, sites = []):
 
     if sites==[]:
       sites= list(range(lenseq))
-      
+
     ## Determination of sites if coding sequence
     Msites = max(sites)+1
     isCodon = False
@@ -213,18 +213,20 @@ def loadResultsBranchSite(resultsFile):
       nbcol=len(col_headers)
       col_lists=[[] for i in range(nbcol)]
       siteList=[]
-      
+
+      deb1 = None # starting value of sites
       for line in f:
         line = line.strip().split()
         lp = re.findall('[0-9]+', line[0]) # results line
         if len(lp)!=0:
+          if deb1==None:
+            deb1 = (int(lp[0]))
           try:
-            siteList.append(int(lp[0])-1)
+            siteList.append(int(lp[0])-deb1)
             for i in range(nbcol):
               col_lists[i].append(float(line[i+1]))
           except ValueError:
             raise OSError(f"Conversion failed in line {line}")
-
     d_cols = {}
 
     for i in range(len(col_lists)):
