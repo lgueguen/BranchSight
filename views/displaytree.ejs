@@ -385,7 +385,7 @@ function updateLayout(cRoot,firstLoad=0,scrolling=1) {
               console.log("classical color "+ col);
           }
           if (col == undefined) {col = "grey"};
-          col_dnas.push(col);
+          col_dnas.push([col,codon]);
         }
       }
       dico_dna[leaf_name] = col_dnas;
@@ -1156,8 +1156,9 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
           name:d.data.name,
           y:d.y,
           pos:j,
-          col:dna,
+          col:dna[0],
           opac:opac,
+          val:dna[1],
         };
         if (displaySeqType == 'Nuc') {
           dna_dataset.push(locnode);
@@ -1172,12 +1173,12 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
   //   .attr('x', function(d) {return 0;})
   //   .attr('y', function(d) {return Math.floor(hStepBase/3);})
   //   .text(function(d) {return d.aa;});
-  seqTextNuc.append('text')
-    .style('letter-spacing', (alignmentLetterSpacing)+'px') // Espacement des lettres pour correpondre au graphe
-    .style("font-size",fitPoliceSize+"px")
-    .attr('x', function(d) {return 0;})
-    .attr('y', function(d) {return Math.floor(hStepBase/3);})
-    .text(function(d) {return d.dna;});
+  // seqTextNuc.append('text')
+  //   .style('letter-spacing', (alignmentLetterSpacing)+'px') // Espacement des lettres pour correpondre au graphe
+  //   .style("font-size",fitPoliceSize+"px")
+  //   .attr('x', function(d) {return 0;})
+  //   .attr('y', function(d) {return Math.floor(hStepBase/3);})
+  //   .text(function(d) {return d.dna;});
   console.log("sequences  OK");
   if (displaySeqType == 'AA') {
   var aaDiv = d3.select('#svg2')
@@ -1208,7 +1209,9 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
       .merge(aablock)
       .append("text")
       .text(function(d) { return d.val; })
-      .attr("transform","translate(0, 12)");
+      .attr("transform","translate(0, 12)")
+      .style("font-family","Courier");
+
       //ENTER + updatesATE
       aablockEnter
       .merge(aablock)
@@ -1252,21 +1255,7 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
         }
         var transy = d.y - 7 ;
         return "translate("+transx+", "+transy+")";
-      })
-      .append("text")
-      .text(function(d) { return d.val; })
-      .style("text-align","center")
-      .attr("transform",function(d,i) {
-        // var dbug_width = d.node().getComputedTextLength();
-        console.log("debug width "+ d.val.node);
-        return "translate(0, 12)";
-      }
-
-    
-      // var police_wdith = d.val.getComputedTextLength();
-      //   console.log("DEBUG WIDTH"+ police_wdith  );
-    
-    );
+      });
     }
     if (displaySeqType == 'Nuc') {
       var dnaDiv = d3.select('#svg2')
@@ -1294,6 +1283,12 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
         .attr('height', hLetter )
         .style("fill", function(d){ return (d.col)})
         .style("opacity", opacityNuc);
+        dnablockEnter
+        .merge(dnablock)
+        .append("text")
+        .text(function(d) { return d.val; })
+        .attr("transform","translate(0, 12)")
+        .style("font-family","Courier");  
         // Rectangles qui soulignent les position sel pos
         //ENTER + updates
         dnablockEnter
