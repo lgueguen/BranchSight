@@ -67,8 +67,10 @@ var nodeWidth = 80;                  // Largeur de l'arbre
 var nodeHeight = 20;                 // Hauteur de l'arbre
 var hLetter = 15;                    // Hauteur des blocs de couleurs
 var hUnderline = 15;                 // Position du soulignage
-var fitNormalPoliceSize = 16.667;    // Taille de la police des aa et dna en mode normal
-var fitSmallPoliceSize = 10.003;     // Taille de la police des aa et dna en mode reduit
+// var fitNormalPoliceSize = 16.667;    // Taille de la police des aa et dna en mode normal
+// var fitSmallPoliceSize = 10.003;     // Taille de la police des aa et dna en mode reduit
+var fitNormalPoliceSize = 15;    // Taille de la police des aa et dna en mode normal
+var fitSmallPoliceSize = 8;     // Taille de la police des aa et dna en mode reduit
 var fitPoliceSize = fitNormalPoliceSize;  // Taille de la police des aa et dna 
 var stringWidth;                      // Largeur affichage arbre
 var tagSimpleGene = false;            // True si arbre de gene de type PhyloXML, False si arbre de gene de type RecPhyloXML
@@ -421,7 +423,7 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
   } else {
     maxSeqLen = resultsJSON.length;
   }
-  resultsJSON = resultsJSON;
+  //resultsJSON = resultsJSON;
   var psGraphMargins = {top: 20, right: 50, bottom: 50, left: 50+seq_lg};
   var psGraphWidth = resultsJSON.length*hStep;
   var psGraphHeight = 100;
@@ -1209,8 +1211,9 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
       .merge(aablock)
       .append("text")
       .text(function(d) { return d.val; })
-      .attr("transform","translate(0, 12)")
-      .style("font-family","Courier");
+      .attr("transform","translate(0, "+(fitPoliceSize - 2) +")")
+      .style("font-family","Courier")
+      .style("font-size",fitPoliceSize+"px");
 
       //ENTER + updatesATE
       aablockEnter
@@ -1287,8 +1290,9 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
         .merge(dnablock)
         .append("text")
         .text(function(d) { return d.val; })
-        .attr("transform","translate(0, 12)")
-        .style("font-family","Courier");  
+        .attr("transform","translate(0, "+(fitPoliceSize - 2) +")")
+        .style("font-family","Courier")
+        .style("font-size",fitPoliceSize+"px");
         // Rectangles qui soulignent les position sel pos
         //ENTER + updates
         dnablockEnter
