@@ -1555,6 +1555,19 @@ function getPositiveRateJSON(textResultsList, leftB, rightB) {
   });
   return nbPos/(rightBoundary - leftBoundary + 1);
 }
+// Get the max  of positive sites within the indicated boundaries
+// --------------------------------------------------------------
+function getPositiveMaxJSON(textResultsList, leftB, rightB) {
+  var jsonResultsList = JSON.parse(textResultsList);
+  var  posMax = 0;
+  jsonResultsList.forEach((value, site) => {
+      if (value >  posMax && site >= leftB && site <= rightB) {
+        posMax = value;
+      }
+    
+  });
+  return posMax;
+}
 // Fonction de test du support local.storage
 // ------------------------------------------
 // https://michalzalecki.com/why-using-localStorage-directly-is-a-bad-idea/
