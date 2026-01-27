@@ -1537,6 +1537,25 @@ function reloadGlobalResults() {
 function hideTooltip() { $('.tooltip').hide(); }
 function showTooltip() { $('.tooltip').show(); }
 function writeTooltip(text) { $('.tooltip').text(text); }
+
+// Get the the value of the selected stat the indicated boundaries
+// --------------------------------------------------------------
+function getPositiveStatsJSON(stat_type,textResultsList, leftB, rightB) {
+  switch (stat_type) {
+    case "rate":
+      getPositiveRateJSON(textResultsList, leftB, rightB);
+      break;
+    case "max":
+      getPositiveMaxJSON(textResultsList, leftB, rightB);
+      break;  
+    default:
+      getPositiveRateJSON(textResultsList, leftB, rightB);
+      break;
+  }
+ 
+}
+
+
 // Get the rate of positive sites within the indicated boundaries
 // --------------------------------------------------------------
 function getPositiveRateJSON(textResultsList, leftB, rightB) {
