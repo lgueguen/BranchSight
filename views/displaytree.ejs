@@ -130,6 +130,7 @@ var nbSites = 0;
 var upperThresholdMode = true;
 var modStepX = 150; // Pas de la variation en largeur
 var modStepY = 5;   // Pas de la variation en hauteur
+var stats_type  = "max";
 
 // Dico des aa ( a ameliorer)
 // ==========================
@@ -582,7 +583,7 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
             // Display a tooltip when hovering the cursor over a node
             if (d.data.branch_info) {
               // writeTooltip(getPositiveRateJSON(d.data.branch_info.results, leftBoundary, rightBoundary).toFixed(3));
-              writeTooltip(getPositiveStatsJSON("rate",d.data.branch_info.results, leftBoundary, rightBoundary).toFixed(3));
+              writeTooltip(getPositiveStatsJSON(stats_type,d.data.branch_info.results, leftBoundary, rightBoundary).toFixed(3));
             } else {
               writeTooltip('');
             }
@@ -1482,7 +1483,7 @@ function updateNodeColors() {
     .style('fill', function(d) {
       if (d.data.branch_info) {
         // var positiveRate = getPositiveRateJSON(d.data.branch_info.results, leftBoundary, rightBoundary).toFixed(3);
-        var positiveRate = getPositiveStatsJSON("rate",d.data.branch_info.results, leftBoundary, rightBoundary).toFixed(3);
+        var positiveRate = getPositiveStatsJSON(stats_type,d.data.branch_info.results, leftBoundary, rightBoundary).toFixed(3);
         return colorByRate(positiveRate);
       }
     });
@@ -1491,7 +1492,7 @@ function updateNodeColors() {
     .style('stroke', function(d) {
       if (d.target.data.branch_info) {
         // var positiveRate = getPositiveRateJSON(d.target.data.branch_info.results, leftBoundary, rightBoundary).toFixed(3);
-        var positiveRate = getPositiveStatsJSON("rate",d.target.data.branch_info.results, leftBoundary, rightBoundary).toFixed(3);
+        var positiveRate = getPositiveStatsJSON(stats_type,d.target.data.branch_info.results, leftBoundary, rightBoundary).toFixed(3);
         return colorByRate(positiveRate);
       }
     });
@@ -1575,6 +1576,7 @@ function getPositiveRateJSON(textResultsList, leftB, rightB) {
       }
     }
   });
+  console.log("positive selection = "+ nbPos/(rightBoundary - leftBoundary + 1))
   return nbPos/(rightBoundary - leftBoundary + 1);
 }
 // Get the max  of positive sites within the indicated boundaries
@@ -1588,6 +1590,7 @@ function getPositiveMaxJSON(textResultsList, leftB, rightB) {
       }
     
   });
+  console.log("positive selection = "+posMax);
   return posMax;
 }
 // Fonction de test du support local.storage
