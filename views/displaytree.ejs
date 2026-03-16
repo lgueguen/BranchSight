@@ -22,23 +22,27 @@ Modified by Grégoire ALIZADEH NOIRET, 15 March 2023
     </nav>
   </header>
   <main>    
-    <div id="navigator-container" style="border:2px solid lightgrey; overflow-y: hidden; width: 100%;">
-      <svg id="svg0"></svg>
-    </div>
-    <div>
-      <div id="bidon" style="border:2px solid lightgrey; float: left; overflow-y: auto; width: 40%;">
-        <svg id="svgbidon"></svg>
+    <div style="border:20px solid green; background-color: white;  position: fixed; top: 30;width: 100%;"> <!-- debut -->
+      <div id="navigator-container" style="border:2px solid lightgrey; background-color:white; overflow-y: hidden; width: 100%;">
+        <svg id="svg0"></svg>
       </div>
-      <div id="selpos" style="border:2px solid lightgrey; overflow-x: auto; overflow-y: auto;">
-        <svg id="svg3"></svg>
+      <div style="border:10px solid red; background-color:white;">
+        <div id="bidon" style="border:2px solid lightgrey;background-color:white; float: left; overflow-y: auto; width: 40%;">
+          <svg id="svgbidon"></svg>
+        </div>
+        <div id="selpos" style="border:2px solid lightgrey;background-color:white; overflow-x: auto; overflow-y: auto;">
+          <svg id="svg3"></svg>
+        </div>
       </div>
-    </div>
-    <div id="tree-container" style="border:2px solid lightgrey; float: left; overflow-y: auto; width: 40%;">
-      <svg id="svg1"></svg>
-    </div>
-    <div id="alignment-container" style="border:2px solid lightgrey; overflow-x: auto; overflow-y: auto;">
-      <svg id="svg2"></svg>
-    </div>
+
+    </div> <!--  fin-->
+      <div id="tree-container" style="z-index:-1;position:relative;top:300px;border:2px solid lightgrey; float: left; overflow-y: auto; width: 40%;">
+        <svg id="svg1"></svg>
+      </div>
+      <div id="alignment-container" style="position:relative;top:300px;border:2px solid lightgrey; overflow-x: auto; overflow-y: auto;">
+        <svg id="svg2"></svg>
+      </div>
+
   </main>
 </body>
 
