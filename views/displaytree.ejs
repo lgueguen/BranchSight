@@ -16,18 +16,18 @@ Modified by Grégoire ALIZADEH NOIRET, 15 March 2023
 
 <body>
   <header>
-    <nav id="main-nav" class="navbar navbar-default navbar-fixed-top">
+    <nav id="main-nav" class="navbar navbar-default navbar-fixed-top" style="z-index: 100">
       <%- include('../partials/header') %>
       <%- include('../partials/buttons') %>
     </nav>
   </header>
   <main>    
-    <div style="background-color: white;  position: fixed; top: 30;width: 100%;"> <!-- debut -->
+    <div style="background-color:white; z-index:-1; position: fixed; top: 30;width: 100%;"> <!-- debut -->
       <div id="navigator-container" style="border:2px solid lightgrey; background-color:white; overflow-y: hidden; width: 100%;">
         <svg id="svg0"></svg>
       </div>
-      <div style="background-color:white;">
-        <div id="bidon" style="border:2px solid lightgrey;background-color:white; float: left; overflow-y: auto; width: 40%;">
+      <div>
+        <div id="bidon" style="border:2px solid lightgrey; float: left; overflow-y: auto; width: 40%;">
           <svg id="svgbidon"></svg>
         </div>
         <div id="selpos" style="border:2px solid lightgrey;background-color:white; overflow-x: auto; overflow-y: auto;">
@@ -36,10 +36,10 @@ Modified by Grégoire ALIZADEH NOIRET, 15 March 2023
       </div>
 
     </div> <!--  fin-->
-      <div id="tree-container" style="z-index:-1;position:relative;top:300px;border:2px solid lightgrey; float: left; overflow-y: auto; width: 40%;">
+      <div id="tree-container" style="z-index:-10;position:relative;top:300px;border:2px solid lightgrey; float: left; overflow-y: auto; width: 40%;">
         <svg id="svg1"></svg>
       </div>
-      <div id="alignment-container" style="z-index:-1;position:relative;top:300px;border:2px solid lightgrey; overflow-x: auto; overflow-y: auto;">
+      <div id="alignment-container" style="z-index:-10;position:relative;top:300px;border:2px solid lightgrey; overflow-x: auto; overflow-y: auto;">
         <svg id="svg2"></svg>
       </div>
 
