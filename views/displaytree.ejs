@@ -15,14 +15,14 @@ Modified by Grégoire ALIZADEH NOIRET, 15 March 2023
 </head>
 
 <body>
-  <header>
+  <header style="z-index: 100">
     <nav id="main-nav" class="navbar navbar-default navbar-fixed-top" style="z-index: 100">
       <%- include('../partials/header') %>
       <%- include('../partials/buttons') %>
     </nav>
   </header>
   <main>    
-    <div style="background-color:white; z-index:-1; position: fixed; top: 30;width: 100%;"> <!-- debut -->
+    <div style="background-color:white; z-index:0; position: fixed; top: 30;width: 100%;"> <!-- debut -->
       <div id="navigator-container" style="border:2px solid lightgrey; background-color:white; overflow-y: hidden; width: 100%;">
         <svg id="svg0"></svg>
       </div>
