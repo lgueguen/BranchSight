@@ -991,9 +991,9 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
       .on('mouseout', hideTooltip)
       .on('click', function(index,d) {
         console.log("click " + index + "=>"+d);
-        writeTooltip(d);
+        writeTooltip(d+1);
         showTooltip();
-        updateNodeColorsOnClick(d);
+        updateNodeColorsOnClick(d+1);
       })
       ;
   // Ajout du seuil supérieur au graphe
