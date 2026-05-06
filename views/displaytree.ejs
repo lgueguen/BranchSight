@@ -15,30 +15,34 @@ Modified by Grégoire ALIZADEH NOIRET, 15 March 2023
 </head>
 
 <body>
-  <header>
-    <nav id="main-nav" class="navbar navbar-default navbar-fixed-top">
+  <header style="z-index: 100">
+    <nav id="main-nav" class="navbar navbar-default navbar-fixed-top" style="z-index: 100">
       <%- include('../partials/header') %>
       <%- include('../partials/buttons') %>
     </nav>
   </header>
   <main>    
-    <div id="navigator-container" style="border:2px solid lightgrey; overflow-y: hidden; width: 100%;">
-      <svg id="svg0"></svg>
-    </div>
-    <div>
-      <div id="bidon" style="border:2px solid lightgrey; float: left; overflow-y: auto; width: 40%;">
-        <svg id="svgbidon"></svg>
+    <div style="background-color:white; z-index:0; position: fixed; top: 30;width: 100%;"> <!-- debut -->
+      <div id="navigator-container" style="border:2px solid lightgrey; background-color:white; overflow-y: hidden; width: 100%;">
+        <svg id="svg0"></svg>
       </div>
-      <div id="selpos" style="border:2px solid lightgrey; overflow-x: auto; overflow-y: auto;">
-        <svg id="svg3"></svg>
+      <div>
+        <div id="bidon" style="border:2px solid lightgrey; float: left; overflow-y: auto; width: 40%;">
+          <svg id="svgbidon"></svg>
+        </div>
+        <div id="selpos" style="border:2px solid lightgrey;background-color:white; overflow-x: auto; overflow-y: auto;">
+          <svg id="svg3"></svg>
+        </div>
       </div>
-    </div>
-    <div id="tree-container" style="border:2px solid lightgrey; float: left; overflow-y: auto; width: 40%;">
-      <svg id="svg1"></svg>
-    </div>
-    <div id="alignment-container" style="border:2px solid lightgrey; overflow-x: auto; overflow-y: auto;">
-      <svg id="svg2"></svg>
-    </div>
+
+    </div> <!--  fin-->
+      <div id="tree-container" style="z-index:-10;position:relative;top:300px;border:2px solid lightgrey; float: left; overflow-y: auto; width: 40%;">
+        <svg id="svg1"></svg>
+      </div>
+      <div id="alignment-container" style="z-index:-10;position:relative;top:300px;border:2px solid lightgrey; overflow-x: auto; overflow-y: auto;">
+        <svg id="svg2"></svg>
+      </div>
+
   </main>
 </body>
 
@@ -949,10 +953,6 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
   var i = 0;
   rects.enter()
     .append('rect')
-          .on('click', function(index,d) {
-        console.log("click " + index + "=>"+d);
-        updateNodeColorsOnClick(d);
-      })
       // .attr('id', function(d) {
       //   return 'ps-rect-'+d.site;
       // })
@@ -989,6 +989,12 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
         showTooltip();
       })
       .on('mouseout', hideTooltip)
+      .on('click', function(index,d) {
+        console.log("click " + index + "=>"+d);
+        writeTooltip(d+1);
+        showTooltip();
+        updateNodeColorsOnClick(d+1);
+      })
       ;
   // Ajout du seuil supérieur au graphe
   psGraph.append('line')
@@ -1520,8 +1526,14 @@ function updateNodeColorsOnClick(x) {
       if (d.data.branch_info) {
         // var positiveRate = getPositiveStatsJSON(stats_type,d.data.branch_info.results, x,x).toFixed(3);
         var positiveRate = getValueJSON(d.data.branch_info.results, x).toFixed(3);
-        
+        console.log("debug positive "+positiveRate)
+        if (positiveRate < 0) {
+          console.log("debug no data "+d.data.branch_info.results);
+        } 
         return colorByRate(positiveRate);
+      }
+      else {
+        console.log("debug no data "+d)
       }
     });
   // The color of a branch depends on the number of positive sites in its node
@@ -1531,6 +1543,9 @@ function updateNodeColorsOnClick(x) {
         // var positiveRate = getPositiveStatsJSON(stats_type,d.target.data.branch_info.results, x,x).toFixed(3);
         var positiveRate = getValueJSON(d.target.data.branch_info.results, x).toFixed(3);
         return colorByRate(positiveRate);
+      }
+      else {
+        console.log("debug2 no data "+d)
       }
     });
 

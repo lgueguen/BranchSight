@@ -251,6 +251,7 @@ header {
 }
 main {
   margin-top: calc(80px + 62px);
+  height:200px;
   /* margin-top: 80px; */
 }
 
