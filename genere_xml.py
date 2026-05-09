@@ -173,34 +173,6 @@ def loadAlignment(alignmentFile, sites = []):
     return alignmentDict2
 
 
-def loadResultsSites(resultsFile, exprcol="'[1]'"):
-    '''Loads site results from formula exprcol on columns.
-    Returns list of results, list of sites (starting with 0)
-    '''
-
-    if len(exprcol)>30:
-      return
-    expr=exprcol[1:-1].replace("[","float(line[")
-    expr=expr.replace("]","])")
-    resultsList = []
-    siteList =[]
-    with open(resultsFile, 'r') as f:
-        for line in f:
-            line = line.strip().split()
-            lp = re.findall('[0-9]+', line[0]) # results line
-            if len(lp)!=0:
-                try:
-                    site = int(lp[0])-1
-                    res = float(eval(expr))
-                except ValueError:
-                    raise OSError(f"Conversion failed in line {line}")
-                else:
-                    resultsList.append(res)
-                    siteList.append(site)
-
-    return resultsList, siteList
-
-
 def loadResultsBranchSite(resultsFile):
     '''Loads branch-site results.
     Returns dict of lists of results, list of sites (starting with 0, when sites in file start with 1)
@@ -209,7 +181,11 @@ def loadResultsBranchSite(resultsFile):
     col_lists = []
 
     with open(resultsFile, 'r') as f:
-      col_headers=f.readline().strip().split()[1:]
+      col_headers=f.readline().strip().split()
+      withSiteNb = not col_headers[0].isnumeric()
+      if withSiteNb:
+        col_headers = col_headers[1:]
+        
       nbcol=len(col_headers)
       col_lists=[[] for i in range(nbcol)]
       siteList=[]
@@ -217,14 +193,22 @@ def loadResultsBranchSite(resultsFile):
       deb1 = None # starting value of sites
       for line in f:
         line = line.strip().split()
-        lp = re.findall('[0-9]+', line[0]) # results line
-        if len(lp)!=0:
-          if deb1==None:
-            deb1 = (int(lp[0]))
+        if withSiteNb:
+          lp = re.findall('[0-9]+', line[0]) # results line
+          if len(lp)!=0:
+            if deb1==None:
+              deb1 = (int(lp[0]))
+            try:
+              siteList.append(int(lp[0])-deb1)
+              for i in range(nbcol):
+                col_lists[i].append(float(line[i+1]))
+            except ValueError:
+              raise OSError(f"Conversion failed in line {line}")
+        else:
+          siteList.append(len(siteList))
           try:
-            siteList.append(int(lp[0])-deb1)
             for i in range(nbcol):
-              col_lists[i].append(float(line[i+1]))
+              col_lists[i].append(float(line[i]))
           except ValueError:
             raise OSError(f"Conversion failed in line {line}")
     d_cols = {}
@@ -251,6 +235,7 @@ def loadResultsBranchSite(resultsFile):
 
     nb_branches = len(col_lists)
     print(nb_branches, 'branches found in results')
+    print(len(siteList), 'sites found in results')
 
     return d_cols_2, siteList
 
