@@ -23,7 +23,7 @@ Modified by Grégoire ALIZADEH NOIRET, 15 March 2023
   </header>
   <main>    
     <div style="background-color:white; z-index:0; position: fixed; top: 30;width: 100%;"> <!-- debut -->
-      <div id="navigator-container" style="border:2px solid lightgrey; background-color:white; overflow-y: hidden; width: 100%;">
+      <div id="navigator-container" style="border:2px solid lightgrey;left:600px; background-color:pink; overflow-y: hidden; width: 100%;">
         <svg id="svg0"></svg>
       </div>
       <div>
@@ -807,9 +807,9 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
   var heightSVG0 = 60;
   var psGraphGlobalWidth = resultsJSON.length;
   var psGraphGlobalHeight = 60;
-  var psGraphGlobalMargins = {top:0, right:0, bottom:0, left:0};
+  var psGraphGlobalMargins = {top:0, right:0, bottom:0, left:300};
   var svg0 = d3.select('#svg0');
-  svg0.attr('width', widthSVG0 + 15)
+  svg0.attr('width', widthSVG0 + 15 +300 )
       .attr("height",psGraphGlobalHeight);
   var svg3 = d3.select('#svg3');
   var svgbidon = d3.select('#svgbidon');
@@ -828,6 +828,7 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
     svg0.append('g')
       .attr('id', 'ps-graph-global')
       .attr('transform', 'translate('+psGraphGlobalMargins.left+', '+psGraphGlobalMargins.top+')');
+      // .attr('transform', 'translate('+0+', '+psGraphGlobalMargins.top+')');
   }
   var psGraphGlobal = d3.select('#ps-graph-global');
   // Calcul du décalage des sites pour le positionnement des rectangles du graphe
@@ -845,7 +846,7 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
       .attr('class', 'ps-rects-global')
       .attr('width', function(d) { return 1; })
       .attr('height', function(d) { return psGraphGlobalHeight; })
-      .attr('x', function(d) { i ++; return i - siteOffset; })
+      .attr('x', function(d) { i ++; return i - siteOffset +300 ; })
       .attr('y', function(d) { return 0; })
       .style('fill', function(d) {
         return getColorFromResult(d);
@@ -883,8 +884,8 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
     var ss =  alignmentWindow.scrollLeft();
     selposWindow.scrollLeft(ss, 0);
     if (automaticBoundaries) {
-      leftBoundary = siteStart;
-      rightBoundary = siteEnd;
+      leftBoundary = siteStart +300 ;
+      rightBoundary = siteEnd + 300 ;
     }
     updateNodeColors();
   };
@@ -894,8 +895,8 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
     $('.navigation-window').remove();
     var siteNumber = - Math.trunc((60 + seq_lg - selposWindow.scrollLeft() - selposWindow.innerWidth()/2)/hStep) - 2;
     var navWindowWidth = selposWindow.innerWidth()/hStep;
-    var siteStart = Math.trunc(siteNumber - navWindowWidth/2) + 5;
-    var siteEnd = Math.trunc(siteNumber + navWindowWidth/2) + 5;
+    var siteStart = Math.trunc(siteNumber - navWindowWidth/2) + 5 +300 ;
+    var siteEnd = Math.trunc(siteNumber + navWindowWidth/2) + 5 +300 ;
     var navWindowRect = psGraphGlobal
       .append('rect')
         .attr('class', 'navigation-window')
@@ -909,8 +910,8 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
     var ss =  selposWindow.scrollLeft();
     alignmentWindow.scrollLeft(ss, 0);
     if (automaticBoundaries) {
-      leftBoundary = siteStart;
-      rightBoundary = siteEnd;
+      leftBoundary = siteStart + 300 ;
+      rightBoundary = siteEnd +300 ;
     }
     updateNodeColors();
   };
@@ -933,7 +934,7 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
   // === Ajout du graphe des résultats au SVG ===
   var psGraph = svg3.append('g')
     .attr('id', 'ps-graph')
-    .attr('transform', 'translate('+(50 + seq_lg)+', '+psGraphMargins.top+')');
+    .attr('transform', 'translate('+(50 + seq_lg )+', '+psGraphMargins.top+')');
   // === Ajout de l'axe x au graphe ===
   psGraph.append('g')
     .attr('transform', 'translate(0,' + psGraphHeight + ')')
