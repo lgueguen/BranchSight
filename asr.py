@@ -109,10 +109,10 @@ class ASR_Node(Node):
   def __compute_forward(self):
     """
     Forward recursion of downward parsimony costs.
-    Olnly known states are built as they are found.
+    Only known states are built as they are found.
     """
 
-    if self.is_leaf(): ##Leaf
+    if self.len_seq() != 0: ##Leaf
       return
     else:
       for child in self.get_children():
@@ -165,7 +165,9 @@ class ASR_Node(Node):
 
     """
 
-    if self.is_leaf():
+    if self.len_seq() != 0:
+      for child in self.get_children():
+        child.__compute_backward()
       return
     
     ### First compute all upcosts of children, then recursion, to avoid to double use of down costs
