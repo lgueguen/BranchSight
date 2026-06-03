@@ -23,11 +23,11 @@ Modified by Grégoire ALIZADEH NOIRET, 15 March 2023
   </header>
   <main>    
     <div style="background-color:white; z-index:0; position: fixed; top: 30;width: 100%;"> <!-- debut -->
-      <div id="navigator-container" style="border:2px solid lightgrey;left:600px; background-color:white; overflow-y: hidden; width: 100%;">
+      <div id="navigator-container" style="border:2px solid lightgrey; left:50%; position:relative; background-color:pink; overflow-y: hidden; width: 50%;">
         <svg id="svg0"></svg>
       </div>
       <div>
-        <div id="bidon" style="border:2px solid lightgrey; float: left; overflow-y: auto; width: 40%;">
+        <div id="bidon" style="border:2px solid lightgrey; float: left; overflow-y: auto; width: 50%;">
           <svg id="svgbidon"></svg>
         </div>
         <div id="selpos" style="border:2px solid lightgrey;background-color:white; overflow-x: auto; overflow-y: auto;">
@@ -36,7 +36,7 @@ Modified by Grégoire ALIZADEH NOIRET, 15 March 2023
       </div>
 
     </div> <!--  fin-->
-      <div id="tree-container" style="z-index:-10;position:relative;top:300px;border:2px solid lightgrey; float: left; overflow-y: auto; width: 40%;">
+      <div id="tree-container" style="z-index:-10;position:relative;top:300px;border:2px solid lightgrey; float: left; overflow-y: auto; width: 50%;">
         <svg id="svg1"></svg>
       </div>
       <div id="alignment-container" style="z-index:-10;position:relative;top:300px;border:2px solid lightgrey; overflow-x: auto; overflow-y: auto;">
@@ -811,6 +811,7 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
   var svg0 = d3.select('#svg0');
   svg0.attr('width', widthSVG0 + 15)
       .attr("height",psGraphGlobalHeight);
+      // .attr('transform', 'translate('+ window.innerWidth*0.5+ ')');
   var svg3 = d3.select('#svg3');
   var svgbidon = d3.select('#svgbidon');
   svg3.attr("width",  50 + seq_lg + 10 + resultsJSON.length*hStep + 10 + seq_lg + 50);
