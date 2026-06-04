@@ -1563,7 +1563,7 @@ function updateNodeColorsOnClick(x) {
 // -----------------------------
 function scrollAlignment(event) {
   // Get the site's number (mouse position in pixels) and navigate to this site in the large window
-  var siteNumber = event.pageX + compactWindow.scrollLeft();
+  var siteNumber = event.pageX + compactWindow.scrollLeft() -  window.innerWidth *0.5; // factor by 0.5 because the div are located at  50% 
   var leftScroll = 50 + seq_lg + 10 + siteNumber*hStep - alignmentWindow.innerWidth()/2;
   var rightScroll = 50 + seq_lg + 10 + siteNumber*hStep + alignmentWindow.innerWidth()/2;
   var siteStart = Math.trunc((leftScroll - (60 + seq_lg))/hStep)+2;
