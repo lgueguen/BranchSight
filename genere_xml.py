@@ -56,10 +56,6 @@ parser.add_argument('-n', '--nostat', dest='nostat', action='store', type=float,
     default=-1.0,\
     help='Value to use in case there is no statistic associated\
     with a site in the sequence')
-## Mode
-parser.add_argument('-b', '--branchsite', dest='isBranchsite', action='store_true',\
-    required=False,\
-    help='View site-branch data')
 ## Toggles
 parser.add_argument('--skipmissing', dest='skipMissingSites', action='store_true',\
     required=False,\
@@ -252,17 +248,22 @@ def ASR_compute(alignmentFile, treeFile, sites = []):
   tree = asr.ASR_Node()
 
   tree.read_nf(treeFile, True)
-  tree.intersect_ancestral_labels()
 
   ## set sequences
   align = loadAlignment(alignmentFile, sites)
   
   leaves = tree.get_leaves()
-  for leaf in leaves:
-    if not leaf.label() in align:
-      print("Missing seq " + leaf.label() + " in " + alignmentFile)
+  children = tree.get_all_children()
+  for child in children:
+    if not child.label() in align:
+      if child in leaves:
+        print("Missing seq " + leaf.label() + " in " + alignmentFile)
     else:
-      leaf.set_sequence(align[leaf.label()])
+      child.set_sequence(align[child.label()])
+
+
+  ## change ancestral node names
+  tree.intersect_ancestral_labels()
 
   ## Compute asr
   tree.parsimony()
@@ -319,8 +320,8 @@ def ASR_compute(alignmentFile, treeFile, sites = []):
   return dictAlign, tree.newick(), results
 
 
-def cleanTree(tree:str):
-    '''Adds branch numbers to a tree.'''
+def cleanNewick(tree:str):
+    '''Adds branch numbers to a tree file in newick format.'''
 
     tree = re.sub(r'([\),])([0-9]+):', r'\1:', tree)
     tree = re.sub(r'([\),])(:[0-9]+):', r'\1:', tree)
@@ -345,7 +346,7 @@ def cleanTree(tree:str):
 
 
 def createPhyloXML(fam,alignmentDict,newick,results):
-    newick = cleanTree(newick)
+    newick = cleanNewick(newick)
 
     # Parse and return exactly one tree from the given file or handle
     if not ':' in newick:
@@ -374,7 +375,7 @@ def createPhyloXML(fam,alignmentDict,newick,results):
     # Copies all objects in a variable and removes the created file
     text = file.read()
     file.close()
-    os.remove('tmpfile-'+rd+'.xml')
+    #    os.remove('tmpfile-'+rd+'.xml')
 
     p = XMLParser(huge_tree=True)
     text = text.replace("phy:", "")
@@ -434,8 +435,7 @@ def createPhyloXML(fam,alignmentDict,newick,results):
 
         famspecies[sp] = 1
 
-        ## Find sequence for current leaf name
-        
+        ## Find sequence for current leaf name        
         seq_alg = alignmentDict.get(sp)
         if not seq_alg:
           print ("undefined alignment for "+ sp)
@@ -472,25 +472,24 @@ def createPhyloXML(fam,alignmentDict,newick,results):
         element.append(evrec)
 
     ## Match branch IDs and branch results, then add branch info
-    if args.isBranchsite:
-        for element in tree.iter('clade'):
-            branch_id = element.find('closing_order').text
-            try:
-                ## Look for the column with header <branch_id> in the results
-                branch_info = etree.Element('branch_info')
-                branch_info.set('id', branch_id)
-                branch_info.set('results', str(results[branch_id]))
-                element.append(branch_info)
-            except KeyError:
-                ## If there is no matching column is results, add one with negative results
-                print(f'Branch ID {branch_id} not found, adding placeholder')
-                branch_info = etree.Element('branch_info')
-                branch_info.set('id', branch_id)
-                dummy_col = json.loads(results['0'])
-                dummy_col = [-1.0 for _ in range(len(dummy_col))]
-                col_str = json.dumps(dummy_col)
-                branch_info.set('results', col_str)
-                element.append(branch_info)
+    for element in tree.iter('clade'):
+      branch_id = element.find('closing_order').text
+      try:
+        ## Look for the column with header <branch_id> in the results
+        branch_info = etree.Element('branch_info')
+        branch_info.set('id', branch_id)
+        branch_info.set('results', str(results[branch_id]))
+        element.append(branch_info)
+      except KeyError:
+        ## If there is no matching column is results, add one with negative results
+        print(f'Branch ID {branch_id} not found, adding placeholder')
+        branch_info = etree.Element('branch_info')
+        branch_info.set('id', branch_id)
+        dummy_col = json.loads(results['0'])
+        dummy_col = [-1.0 for _ in range(len(dummy_col))]
+        col_str = json.dumps(dummy_col)
+        branch_info.set('results', col_str)
+        element.append(branch_info)
 
     print ("Number of leaves : ")
     print (nbfeuille)
@@ -518,12 +517,6 @@ def createPhyloXML(fam,alignmentDict,newick,results):
     e=subtree[0].find('phylogeny')
     e.append(treesize)
     e.append(LengthMaxSeqID)
-
-    ## Add global results to tree
-    if not args.isBranchsite:
-      globalResultsElement = etree.Element('global_results')
-      globalResultsElement.set('results', str(results))
-      e.append(globalResultsElement) # add the tag containing results
 
     geneticcode = etree.Element("geneticCode")
     gC = geneticCode()

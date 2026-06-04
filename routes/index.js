@@ -96,8 +96,7 @@ router.post("/upload_files", upload.fields([
       + opt_r
       +' -o '+xml_dir+fname_xml
       +' -e "\''+statcol+'\'"'
-      +' -n '+nostat
-      +(branchSite?' -b ':''),
+       +' -n '+nostat,
   (error, stdout, stderr) => {
     if (error) {
         console.log(`error: ${error.message}`);
