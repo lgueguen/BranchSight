@@ -950,7 +950,48 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
       // console.log('big graph: attaching resultsJSON', resultsJSON);
       return resultsJSON;
     });
-  // === Affichage des rectangles ===
+  var rectsfond = psGraph
+  .selectAll('.ps-rects')
+  .data(function() {
+    // console.log('big graph: attaching resultsJSON', resultsJSON);
+    return resultsJSON;
+  });   
+  
+  // === Calcul du décalage des sites pour le positionnement des rectangles du graphe ===
+  // === Association des données aux futurs rectangles ===
+  // === Affichage des rectangles de fond ===
+  var i = 0;
+  rectsfond.enter()
+    .append('rect')
+      // .attr('id', function(d) {
+      //   return 'ps-rect-'+d.site;
+      // })
+      .attr('class', 'ps-rects')
+      // .attr('title', function(d) {
+      //   return d.site;
+      // })
+      .attr('width', function(d) { return hStep; })
+      .attr('height', 100)
+      .attr('x', function(d) { i ++; return x(i - siteOffset); })
+      .attr('y', 0)
+      .style('fill', "#faf0e6")
+      .style('stroke', '#000000')
+      .style('stroke-width', '0')
+      .on('mouseover', function(d) {
+        // console.log(d);
+        writeTooltip(d);
+        showTooltip();
+      })
+      .on('mouseout', hideTooltip)
+      .on('click', function(index,d) {
+        console.log("click " + index + "=>"+d);
+        writeTooltip(d);
+        showTooltip();
+        updateNodeColorsOnClick(d);
+      })
+      ;  
+
+  // === Affichage des rectangles indiquant la valeur===
   var i = 0;
   rects.enter()
     .append('rect')
@@ -997,6 +1038,9 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
         updateNodeColorsOnClick(d);
       })
       ;
+
+
+
   // Ajout du seuil supérieur au graphe
   psGraph.append('line')
     .attr('x1', x(1))
