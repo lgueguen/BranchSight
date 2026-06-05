@@ -16,21 +16,21 @@ Modified by Grégoire ALIZADEH NOIRET, 15 March 2023
 
 <body>
   <header style="z-index: 100">
-    <nav id="main-nav" class="navbar navbar-default navbar-fixed-top" style="z-index: 100">
+    <nav id="main-nav" class="navbar navbar-default navbar-fixed-top" style="background-color:white; z-index: 100">
       <%- include('../partials/header') %>
       <%- include('../partials/buttons') %>
     </nav>
   </header>
   <main>    
-    <div style="background-color:white; z-index:0; position: fixed; top: 30;width: 100%;"> <!-- debut -->
-      <div id="navigator-container" style="border:2px solid lightgrey; left:30%; position:relative; background-color:white; overflow-y: hidden; width: 70%;">
+    <div style="z-index:0; position: fixed; top: 0;width: 100%;"> <!-- debut -->
+      <div id="navigator-container" style="border:2px solid lightgrey; left:30%; position:relative; overflow-y: hidden; width: 70%;">
         <svg id="svg0"></svg>
       </div>
       <div>
         <div id="bidon" style="border:2px solid lightgrey; float: left; overflow-y: auto; width: 30%;">
           <svg id="svgbidon"></svg>
         </div>
-        <div id="selpos" style="border:2px solid lightgrey;background-color:white; overflow-x: auto; overflow-y: auto;">
+        <div id="selpos" style="background-color:white; border:2px solid lightgrey; overflow-x: auto; overflow-y: auto;">
           <svg id="svg3"></svg>
         </div>
       </div>
@@ -818,10 +818,18 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
   if (flag_histogram == -1 )  {
     svg3.attr("height",  0);
     svgbidon.attr("height",  0);
+    d3.select("#tree-container")
+    .style("top", "0px");
+    d3.select("#alignment-container")
+    .style("top", "0px");    
   }
   else {
         svg3.attr("height",  200);
     svgbidon.attr("height",  200);
+    d3.select("#tree-container")
+    .style("top", "300px");
+    d3.select("#alignment-container")
+    .style("top", "300px");      
   }
   d3.select('#ps-graph-global').remove();
   if (!document.getElementById('ps-graph-global')) {
