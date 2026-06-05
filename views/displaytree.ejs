@@ -16,27 +16,27 @@ Modified by Grégoire ALIZADEH NOIRET, 15 March 2023
 
 <body>
   <header style="z-index: 100">
-    <nav id="main-nav" class="navbar navbar-default navbar-fixed-top" style="z-index: 100">
+    <nav id="main-nav" class="navbar navbar-default navbar-fixed-top" style="background-color:white; z-index: 100">
       <%- include('../partials/header') %>
       <%- include('../partials/buttons') %>
     </nav>
   </header>
   <main>    
-    <div style="background-color:white; z-index:0; position: fixed; top: 30;width: 100%;"> <!-- debut -->
-      <div id="navigator-container" style="border:2px solid lightgrey; left:50%; position:relative; background-color:white; overflow-y: hidden; width: 50%;">
+    <div style="z-index:0; position: fixed; top: 30;width: 100%; background-color:white;height:30px"> <!-- debut -->
+      <div id="navigator-container" style="border:2px solid lightgrey; background-color:white; left:30%; position:relative; overflow-y: hidden; width: 70%;">
         <svg id="svg0"></svg>
       </div>
       <div>
-        <div id="bidon" style="border:2px solid lightgrey; float: left; overflow-y: auto; width: 50%;">
+        <div id="bidon" style="border:2px solid lightgrey; float: left; overflow-y: auto; width: 30%;">
           <svg id="svgbidon"></svg>
         </div>
-        <div id="selpos" style="border:2px solid lightgrey;background-color:white; overflow-x: auto; overflow-y: auto;">
+        <div id="selpos" style="background-color:white; border:2px solid lightgrey; overflow-x: auto; overflow-y: auto;">
           <svg id="svg3"></svg>
         </div>
       </div>
 
     </div> <!--  fin-->
-      <div id="tree-container" style="z-index:-10;position:relative;top:300px;border:2px solid lightgrey; float: left; overflow-y: auto; width: 50%;">
+      <div id="tree-container" style="z-index:-10;position:relative;top:300px;border:2px solid lightgrey; float: left; overflow-y: auto; width: 30%;">
         <svg id="svg1"></svg>
       </div>
       <div id="alignment-container" style="z-index:-10;position:relative;top:300px;border:2px solid lightgrey; overflow-x: auto; overflow-y: auto;">
@@ -107,7 +107,7 @@ var psThresholdLow = parseFloat($('#ps-threshold-low').val()) || parseFloat(0.9)
 var psThresholdHighBgColor = "#FF0000";
 var psThresholdLowBgColor = "#FFFF00";
 var psBelowThresholdBgColor = "#DDDDDD";
-var psMissingBgColor = "#FFFFFF";
+var psMissingBgColor = "#faf0e6";
 var seq_lg = xmlparser.flatTree(recTree.phyloxml.phylogeny.maxSeqIdLength)*10;
 var isDNA = (xmlparser.flatTree(recTree.phyloxml.phylogeny.size.isDNA)=="true");
 var isCodon = (xmlparser.flatTree(recTree.phyloxml.phylogeny.size.isCodon)=="true");
@@ -818,10 +818,18 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
   if (flag_histogram == -1 )  {
     svg3.attr("height",  0);
     svgbidon.attr("height",  0);
+    d3.select("#tree-container")
+    .style("top", "0px");
+    d3.select("#alignment-container")
+    .style("top", "0px");    
   }
   else {
         svg3.attr("height",  200);
     svgbidon.attr("height",  200);
+    d3.select("#tree-container")
+    .style("top", "300px");
+    d3.select("#alignment-container")
+    .style("top", "300px");      
   }
   d3.select('#ps-graph-global').remove();
   if (!document.getElementById('ps-graph-global')) {
@@ -850,7 +858,7 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
       .attr('y', function(d) { return 0; })
       .style('fill', function(d) {
         return getColorFromResult(d);
-      });
+      });          
   // Handle click-drag events on the small graph
   document.getElementById(compactWindow.attr('id')).onmousedown = function(e) {
     scrollAlignment(e);
@@ -950,7 +958,48 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
       // console.log('big graph: attaching resultsJSON', resultsJSON);
       return resultsJSON;
     });
-  // === Affichage des rectangles ===
+  var rectsfond = psGraph
+  .selectAll('.ps-rects')
+  .data(function() {
+    // console.log('big graph: attaching resultsJSON', resultsJSON);
+    return resultsJSON;
+  });   
+  
+  // === Calcul du décalage des sites pour le positionnement des rectangles du graphe ===
+  // === Association des données aux futurs rectangles ===
+  // === Affichage des rectangles de fond ===
+  var i = 0;
+  rectsfond.enter()
+    .append('rect')
+      // .attr('id', function(d) {
+      //   return 'ps-rect-'+d.site;
+      // })
+      .attr('class', 'ps-rects')
+      // .attr('title', function(d) {
+      //   return d.site;
+      // })
+      .attr('width', function(d) { return hStep; })
+      .attr('height', 100)
+      .attr('x', function(d) { i ++; return x(i - siteOffset); })
+      .attr('y', 0)
+      .style('fill', "white")
+      .style('stroke', '#000000')
+      .style('stroke-width', '0')
+      .on('mouseover', function(d) {
+        // console.log(d);
+        writeTooltip(d);
+        showTooltip();
+      })
+      .on('mouseout', hideTooltip)
+      .on('click', function(index,d) {
+        console.log("click " + index + "=>"+d);
+        writeTooltip(d);
+        showTooltip();
+        updateNodeColorsOnClick(d);
+      })
+      ;  
+
+  // === Affichage des rectangles indiquant la valeur===
   var i = 0;
   rects.enter()
     .append('rect')
@@ -997,6 +1046,9 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
         updateNodeColorsOnClick(d);
       })
       ;
+
+
+
   // Ajout du seuil supérieur au graphe
   psGraph.append('line')
     .attr('x1', x(1))
@@ -1563,7 +1615,7 @@ function updateNodeColorsOnClick(x) {
 // -----------------------------
 function scrollAlignment(event) {
   // Get the site's number (mouse position in pixels) and navigate to this site in the large window
-  var siteNumber = event.pageX + compactWindow.scrollLeft() -  window.innerWidth *0.5; // factor by 0.5 because the div are located at  50% 
+  var siteNumber = event.pageX + compactWindow.scrollLeft() -  window.innerWidth *0.3; // factor by 0.5 because the div are located at  30% 
   var leftScroll = 50 + seq_lg + 10 + siteNumber*hStep - alignmentWindow.innerWidth()/2;
   var rightScroll = 50 + seq_lg + 10 + siteNumber*hStep + alignmentWindow.innerWidth()/2;
   var siteStart = Math.trunc((leftScroll - (60 + seq_lg))/hStep)+2;
