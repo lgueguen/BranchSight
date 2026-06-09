@@ -1358,7 +1358,7 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
         .merge(dnablock)
         .append("text")
         .text(function(d) { return d.val; })
-        .attr("transform","translate(0, "+(fitPoliceSize - 2) +")")
+        .attr("transform","translate(3, "+(fitPoliceSize - 2) +")")
         .style("font-family","Courier")
         .style("font-size",fitPoliceSize+"px");
         // Rectangles qui soulignent les position sel pos
