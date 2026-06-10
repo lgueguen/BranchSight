@@ -155,7 +155,9 @@ router.post("/upload_files", upload.fields([
           pattern: JSONpattern,
           branchSite: branchSite,
           logBranchLength: logBranchLength,
-          isNuc: isNuc
+          isNuc: isNuc,
+          minThreshold: "0.2",
+          maxThreshold: "0.8"
         });
         if (fileRemoval) {
           console.log('Deleting XML file');
@@ -210,7 +212,9 @@ router.get('/display_example', function(req, res) {
         arbre: JSONtree,
         pattern: JSONpattern,
         branchSite: true,
-        logBranchLength: true
+        logBranchLength: true,
+        minThreshold: "0.2",
+        maxThreshold: "0.8"
       });
     });
   });

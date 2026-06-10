@@ -22,15 +22,15 @@ Modified by Grégoire ALIZADEH NOIRET, 15 March 2023
     </nav>
   </header>
   <main>    
-    <div style="z-index:0; position: fixed; top: 30;width: 100%; background-color:white;height:30px"> <!-- debut -->
-      <div id="navigator-container" style="border:0px solid lightgrey; background-color:lightgray; left:30%; position:relative; overflow-y: hidden; width: 70%;">
+    <div style="z-index:0; position: fixed; top: 30;width: 100%;"> <!-- debut -->
+      <div id="navigator-container" style="border:0px solid lightgrey; background-color:white; left:30%; position:relative; overflow-y: hidden; width: 70%;">
         <svg id="svg0"></svg>
       </div>
       <div>
         <div id="bidon" style="border:0px solid lightgrey; float: left; overflow-y: auto; width: 30%;">
           <svg id="svgbidon"></svg>
         </div>
-        <div id="selpos" style="background-color:lightgray; border:0px solid lightgrey; overflow-x: auto; overflow-y: auto;">
+        <div id="selpos" style="background-color:white; border:0px solid lightgrey; overflow-x: auto; overflow-y: auto;">
           <svg id="svg3"></svg>
         </div>
       </div>
@@ -809,8 +809,8 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
   var psGraphGlobalHeight = 60;
   var psGraphGlobalMargins = {top:0, right:0, bottom:0, left:0};
   var svg0 = d3.select('#svg0');
-  svg0.attr('width', widthSVG0 + 15)
-      .attr("height",psGraphGlobalHeight);
+  svg0.attr('width', widthSVG0 + 15);
+      // .attr("height",psGraphGlobalHeight);
       // .attr('transform', 'translate('+ window.innerWidth*0.5+ ')');
   var svg3 = d3.select('#svg3');
   var svgbidon = d3.select('#svgbidon');
@@ -818,14 +818,16 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
   if (flag_histogram == -1 )  {
     svg3.attr("height",  0);
     svgbidon.attr("height",  0);
+    svg0.attr("height",  0);
     d3.select("#tree-container")
     .style("top", "0px");
     d3.select("#alignment-container")
     .style("top", "0px");    
   }
   else {
-        svg3.attr("height",  200);
+    svg3.attr("height",  200);
     svgbidon.attr("height",  200);
+    svg0.attr("height",  psGraphGlobalHeight);
     d3.select("#tree-container")
     .style("top", "300px");
     d3.select("#alignment-container")
@@ -1356,7 +1358,7 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
         .merge(dnablock)
         .append("text")
         .text(function(d) { return d.val; })
-        .attr("transform","translate(0, "+(fitPoliceSize - 2) +")")
+        .attr("transform","translate(3, "+(fitPoliceSize - 2) +")")
         .style("font-family","Courier")
         .style("font-size",fitPoliceSize+"px");
         // Rectangles qui soulignent les position sel pos
