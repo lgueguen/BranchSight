@@ -6,10 +6,14 @@
 # To be done, indel mgmt
 
 from tree import *
+import math
 import argparse
 import sys
+import genere_xml
+from Bio.Align import substitution_matrices
+#~matrix = substitution_matrices.load("BLOSUM62")
 
-def SubsCost(a,b):
+def SubsCost(a,b, mat = {}):
   """Costs for substitutions. Indels cost likewise.
 
   """
@@ -19,6 +23,7 @@ def SubsCost(a,b):
     return 1
   else:
     return 0
+
   
 def add_cost_to(cost1, cost2):
   """Add disctionary cost2 in cost1 (that is changed).
@@ -31,24 +36,6 @@ def add_cost_to(cost1, cost2):
       cost1[k] = v
 
       
-def loadAlignment(alignmentFile):
-  """Loads a FASTA alignment.
-
-  """
-  alignmentDict = {}
-  with open(alignmentFile, 'r') as af:
-        for line in af:
-            if line[0] == '>': # sequence id
-                seq_id = line.strip('\n')[1:]
-                alignmentDict[seq_id] = ''
-            else: # sequence
-                aligned_seq = line.strip('\n').upper()
-                if len(alignmentDict[seq_id]) == 0:
-                    alignmentDict[seq_id] = aligned_seq
-                else:
-                    alignmentDict[seq_id] += aligned_seq
-
-  return alignmentDict
 
 
 class ASR_Node(Node):
@@ -76,13 +63,15 @@ class ASR_Node(Node):
     self.__bestseq = seq
     
   def get_sequence(self):
+    return self.__bestseq
+
+  def make_sequence(self):
     if len(self.__bestseq)==0:
       lseq=[]
       for pos in range(self.__lenseq):
         lseq.append(min(self.__costs[pos], key=self.__costs[pos].get))
-      self.__bestseq = "".join(lseq)
-    return self.__bestseq
-  
+      self.__bestseq = lseq
+
   def len_seq(self):
     return self.__lenseq
 
@@ -106,13 +95,14 @@ class ASR_Node(Node):
   def __get_costs(self, pos):
     return self.__costs[pos]
 
+  
   def __compute_forward(self):
     """
     Forward recursion of downward parsimony costs.
     Only known states are built as they are found.
     """
 
-    if self.len_seq() != 0: ##Leaf
+    if self.get_sequence() != "": ##Leaf or assigne sequence
       return
     else:
       for child in self.get_children():
@@ -120,15 +110,11 @@ class ASR_Node(Node):
 
     ### Set here costs
     self.__costs= []
-    # if self.is_root():
-    #   leaves = self.get_leaves()
 
     self.__lenseq=self.get_children()[0].len_seq()
 
     for pos in range(self.__lenseq):
       self.__costs.append({})
-
-      ## check if unknown 
 
       herecost = self.__costs[pos]
 
@@ -141,31 +127,26 @@ class ASR_Node(Node):
       if not "*" in herecost:
         herecost["*"] = 0
       
-      # if self.is_root():
-      #   for leaf in leaves:
-      #     for st in leaf.states(pos):
-      #       if not st in herecost:
-      #         herecost[st] = 0
         
       for child in self.get_children():
         for k in herecost.keys():
-          vok = 1000000
+          vok = math.inf
           for st in child.states(pos):
             vst = child.cost_from(st, pos) + SubsCost(k,st)
             if vst < vok:
               vok = vst
           herecost[k] += vok
-          
+        
   def __compute_backward(self, upcost = []):
     """Backward recursion of upward parsimony costs.
-    A dictionnary of up costs are transmitted downward.
+    A dictionnary of up costs is transmitted downward.
 
     Substitution costs are recomputed intead of stored previously. To
     be ameliorated later.
 
     """
 
-    if self.len_seq() != 0:
+    if self.get_sequence() != "":   # A sequence already exists, block recursion
       for child in self.get_children():
         child.__compute_backward()
       return
@@ -197,7 +178,7 @@ class ASR_Node(Node):
           if other==child:
             continue
           for k in upcostchildpos.keys():
-            vok = 1000000
+            vok = math.inf
             for st in other.states(pos):
               vst = other.cost_from(st, pos) + SubsCost(k,st)
               if vst < vok:
@@ -207,7 +188,7 @@ class ASR_Node(Node):
         # father
         if upcost!=[]:
           for k in upcostchildpos.keys():
-            vok = 1000000
+            vok = math.inf
             for st in upcost[pos].keys():
               vst = upcost[pos][st] + SubsCost(k,st)
               if vst < vok:
@@ -215,7 +196,7 @@ class ASR_Node(Node):
           upcostchildpos[k] += vok
 
         upcostchildren[child].append(upcostchildpos)
-        
+  
    ## Then recursion
     for child in self.get_children():
       child.__compute_backward(upcostchildren[child])
@@ -230,8 +211,8 @@ class ASR_Node(Node):
             self.__costs[pos][k]=v+self.__costs[pos]["*"]
         for k in self.__costs[pos]:
           if not k in upcost[pos]:
-            self.__costs[pos][k]+=upcost[pos]["*"]
-            
+            self.__costs[pos][k]+=upcost[pos]["*"]        
+
 if __name__ == "__main__":
   parser = argparse.ArgumentParser()
 
@@ -255,7 +236,7 @@ if __name__ == "__main__":
   tree.read_nf(args.tree, True)
   tree.intersect_ancestral_labels()
   
-  align = loadAlignment(args.align)
+  align = genere_xml.loadAlignment(args.align)
 
   ## set sequences
   leaves = tree.get_leaves()
@@ -268,6 +249,11 @@ if __name__ == "__main__":
   ## Compute asr
   tree.parsimony()
 
+  ## then best sequence for all nodes
+  lnodes = tree.get_all_children()
+  for node in lnodes:
+    node.make_sequence()
+
   ### output all sequences
 
   fout=open(args.output, "w")
@@ -276,8 +262,7 @@ if __name__ == "__main__":
     fout.write(">"+node.label()+"\n")
 
     seq = node.get_sequence()
-
-    fout.write(seq)
+    fout.write("".join(seq))
     fout.write("\n")
 
   fout.close()
@@ -290,24 +275,26 @@ if __name__ == "__main__":
 
     fout.write("[Site]\t")
     fout.write("\t".join([node.label() for node in lnodes]))
+    fout.write("\n")
                
     lnodes = tree.get_all_children()
-    lseq = len(lnodes[0].get_sequence())
+    lseq = lnodes[0].len_seq()
 
-    for i in range(lseq):
-      fout.write("[%d]"%(i+1))
+    for pos in range(lseq):
+      fout.write("[%d]"%(pos+1))
     
       for node in lnodes:
-        if not node.up:
+        par = node.go_father()
+        if not par:
           cost = 0
         else:
-          seqi = node.get_sequence()[i]
-          upi = node.up.get_sequence()[i]
-
+          seqi = node.get_sequence()[pos]
+          upi = par.get_sequence()[pos]
+          
           cost = SubsCost(upi, seqi)
 
-      fout.write("\t%f"%(cost))
+        fout.write("\t%f"%(cost))
 
-    fout.write("\n")
+      fout.write("\n")
     fout.close()
 
