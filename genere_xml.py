@@ -34,36 +34,6 @@ from xml.dom import minidom
 
 from lxml.etree import XMLParser
 
-parser = argparse.ArgumentParser(description='Generate an XML file from \
-    a tree, an alignment and statistics.')
-## Files
-parser.add_argument('-t', '--tree', dest='treeFile', action='store',\
-    required=True,\
-    help='File containing a tree in Newick format')
-parser.add_argument('-a', '--align', dest='alignmentFile', action='store',\
-    required=True,\
-    help='File containing an alignment in FASTA format')
-parser.add_argument('-r', '--results', dest='resultsFile', action='store',\
-    required=False,\
-    help='File containing the results')
-parser.add_argument('-o', '--output', dest='output', action='store',\
-    help='Name of the output XML file (if not specified, the XML will have \
-    the same name as the tree file)')
-parser.add_argument('-e', '--exp', dest='exprcol', action='store', type=str,\
-    default=1,\
-    help='Formula to be applied on the column values')
-parser.add_argument('-n', '--nostat', dest='nostat', action='store', type=float,\
-    default=-1.0,\
-    help='Value to use in case there is no statistic associated\
-    with a site in the sequence')
-## Toggles
-parser.add_argument('--skipmissing', dest='skipMissingSites', action='store_true',\
-    required=False,\
-    help='Prevent the addition of special values (-n, --nostat) for sites that are absent from the results file. \
-        This results in sites being next to each other on the graph even though their positions are distant.')
-args = parser.parse_args()
-
-
 def geneticCode():
   matches = {
     # DNA
@@ -106,27 +76,68 @@ def geneticCode():
   return(matches)
 
 
-def nucToAmino(nuc_seq:str):
-    '''Converts a DNA/RNA sequence into a proteic sequence.'''
+def nucToAmino(nuc_seq:list):
+    '''
+    Converts a DNA/RNA list of codons into a proteic sequence inot a list of aa.
+    '''
 
     matches=geneticCode()
     matches["---"] = "-";
-    aa = ''
-    codons = [nuc_seq[i:i+3].upper() for i in range(0, len(nuc_seq), 3)]
-    for codon in codons:
+    laa = []
+    for codon in nuc_seq:
         if len(codon) == 3:
             try:
-                aa += matches[codon]
+                laa.append(matches[codon])
             except KeyError:
                 print(f"Unknown codon: {codon}, adding 'X' to sequence")
-                aa += 'X'
+                laa.append('X')
         else:
             print(f"Ignored: {codon} (not a codon)")
-    return aa
+    return laa
 
+  
+def test_is_coding(alignmentDict:dict):
+  """ Test is tha alignmentDict is coding sequences.
+  Conditions:
+  - No codon cut by indel
+  - No too many codon stop .
+  """
 
+  gc = geneticCode()
+  
+  nstop = 0
+  for k,nuc_seq in alignmentDict.items():
+    laa = []
+    codons = [nuc_seq[i:i+3].upper() for i in range(0, len(nuc_seq), 3)]
+    for codon in codons:
+      if codon == "---":
+          continue        
+      if len(codon) == 3:
+        try:
+          if gc[codon] == "*":
+            nstop += 1
+        except KeyError:
+          return False
+      else:
+        return False
+    if nstop > len(nuc_seq)*len(alignmentDict)/50:  ## allow a given proportion of stops
+      return False
+    
+    return True
+
+def test_is_nucl(alignmentDict):
+  for seq in alignmentDict.values():
+    for nuc in seq:
+      if not nuc.upper() in "ACGTN-X!*":
+        return false
+  return true
+      
+  
 def loadAlignment(alignmentFile, sites = []):
-    '''Loads a FASTA alignment with sites (starting at position 0)'''
+    '''Loads a FASTA alignment with sites (starting at position 0)
+    Output: (dictionary of lists of states)
+    '''
+
     alignmentDict = {}
     maxSeqIdLength = 0
     with open(alignmentFile, 'r') as af:
@@ -145,28 +156,41 @@ def loadAlignment(alignmentFile, sites = []):
 
     ## Take only assigned sites
     lenseq=len(alignmentDict[list(alignmentDict.keys())[0]])
-
+    
     if sites==[]:
-      sites= list(range(lenseq))
-
-    ## Determination of sites if coding sequence
-    Msites = max(sites)+1
-    isCodon = False
-    if Msites == lenseq/3:
-      isCodon=True # Unsafe:perhaps to few sites to detect non-coding sequence
-    elif Msites!=lenseq:
-      sys.exit("Mismatch in lengths between alignment (" + str(lenseq) + ") and sites (" + str(Msites) + ")")
-
-    if not isCodon:
-      lsites = sites
+      isCodon = test_is_coding(alignmentDict)
+      if isCodon:
+        sites= list(range(int(lenseq/3)))
+      else:
+        sites= list(range(lenseq))
     else:
-      lsites = [y  for x in sites for y in [3*x,3*x+1,3*x+2]]
-      
+      Msites = max(sites)+1
+      if Msites == lenseq/3:
+        isCodon=True # Unsafe:perhaps to few sites to detect non-coding sequence
+      elif Msites!=lenseq:
+        sys.exit("Mismatch in lengths between alignment (" + str(lenseq) + ") and sites (" + str(Msites) + ")")
+
+
+    ### list of sites
     alignmentDict2 = {}
-    for name, seq in alignmentDict.items():
-      alignmentDict2[name]="".join([seq[x] for x in lsites])
-      
+    if not isCodon:
+      for name, seq in alignmentDict.items():
+        alignmentDict2[name]=[seq[x] for x in sites]
+    else:
+      for name, seq in alignmentDict.items():
+        alignmentDict2[name]= ["".join([seq[3*x],seq[3*x+1],seq[3*x+2]]) for x in sites]
+
     return alignmentDict2
+
+
+def percentile(lvalue, perc):
+  """
+  From a list of float values, return the value for the percentile perc.
+  """
+
+  lvalue.sort()
+  iperc = int(len(lvalue)*perc)
+  return lvalue[iperc]
 
 
 def loadResultsBranchSite(resultsFile):
@@ -245,12 +269,12 @@ def getColnames(file):
 
 
 def ASR_compute(alignmentFile, treeFile, sites = []):
-  tree = asr.ASR_Node()
-
-  tree.read_nf(treeFile, True)
-
-  ## set sequences
+  ## set sequences & adjust sites, if necessary
   align = loadAlignment(alignmentFile, sites)
+  
+  tree = asr.ASR_Node()
+  
+  tree.read_nf(treeFile, True)
   
   leaves = tree.get_leaves()
   children = tree.get_all_children()
@@ -261,12 +285,16 @@ def ASR_compute(alignmentFile, treeFile, sites = []):
     else:
       child.set_sequence(align[child.label()])
 
-
   ## change ancestral node names
   tree.intersect_ancestral_labels()
 
   ## Compute asr
   tree.parsimony()
+
+  ### compute best sequences
+  lnodes = tree.get_all_children()
+  for node in lnodes:
+    node.make_sequence()
 
   ### return dict of all sequences
 
@@ -299,7 +327,6 @@ def ASR_compute(alignmentFile, treeFile, sites = []):
       else:
         seq = node.get_sequence()
         up = node.go_father().get_sequence()
-
         results[str(n)] = '[' + ",".join([str(asr.SubsCost(up[i], seq[i])) for i in range(lseq)]) + ']'
 
 
@@ -317,6 +344,7 @@ def ASR_compute(alignmentFile, treeFile, sites = []):
       fout.write("\n")
 
     fout.close()
+
   return dictAlign, tree.newick(), results
 
 
@@ -375,7 +403,7 @@ def createPhyloXML(fam,alignmentDict,newick,results):
     # Copies all objects in a variable and removes the created file
     text = file.read()
     file.close()
-    #    os.remove('tmpfile-'+rd+'.xml')
+    os.remove('tmpfile-'+rd+'.xml')
 
     p = XMLParser(huge_tree=True)
     text = text.replace("phy:", "")
@@ -407,10 +435,12 @@ def createPhyloXML(fam,alignmentDict,newick,results):
     lenseq = 0
 
     # Check results
-    if type(results)==type([]): # Site results
-      lenres=len(results)
-    else:
-      lenres=[len(eval(v)) for v in results.values()][0]
+    lenres=[len(eval(v)) for v in results.values()][0]
+
+    # get all values
+    allres = []
+    for res in results.values():
+      allres+=eval(res)
 
     maxSeqIdLength = 0
 
@@ -457,16 +487,17 @@ def createPhyloXML(fam,alignmentDict,newick,results):
         ## Add sequence to 'leaf
         if len(seq_alg)==0:
           continue
-        
-        if lenres==lenseq/3:
-          isCodon="true"
-          leaf.set('dnaAlign', seq_alg) # coding sequence
-          leaf.set('aaAlign', nucToAmino(seq_alg)) # translated sequence
-        elif lenres==lenseq:
-          isCodon="false"                
-          leaf.set('aaAlign', seq_alg) # raw sequence (any type)
-        else:
+
+        if lenres!=lenseq:
           sys.exit("Mismatch lengths between alignment (" + str(lenseq) + ") and sites (" + str(lenres) + ")")
+
+        if len(seq_alg[0])==3:
+          isCodon="true"
+          leaf.set('dnaAlign', "".join(seq_alg)) # coding sequence
+          leaf.set('aaAlign', "".join(nucToAmino(seq_alg))) # translated sequence
+        else:
+          isCodon="false"                
+          leaf.set('aaAlign', "".join(seq_alg)) # raw sequence (any type)
 
         evrec.append(leaf)
         element.append(evrec)
@@ -480,15 +511,12 @@ def createPhyloXML(fam,alignmentDict,newick,results):
         branch_info.set('id', branch_id)
         branch_info.set('results', str(results[branch_id]))
         element.append(branch_info)
-      except KeyError:
+      except KeyError as e:
         ## If there is no matching column is results, add one with negative results
         print(f'Branch ID {branch_id} not found, adding placeholder')
         branch_info = etree.Element('branch_info')
         branch_info.set('id', branch_id)
-        dummy_col = json.loads(results['0'])
-        dummy_col = [-1.0 for _ in range(len(dummy_col))]
-        col_str = json.dumps(dummy_col)
-        branch_info.set('results', col_str)
+        branch_info.set('results', str(results['0']))
         element.append(branch_info)
 
     print ("Number of leaves : ")
@@ -525,6 +553,17 @@ def createPhyloXML(fam,alignmentDict,newick,results):
 
     e.append(geneticcode) # add the tag containing geneticcode
 
+    #### percentiles
+    
+    lperc = {str(x):str(100*percentile(allres,x)) for x in [0.01,0.05,0.95,0.99]}
+
+    percentiles = etree.Element("Percentiles")
+    for perc, vperc in lperc.items():
+      percentiles.set("p"+perc,vperc)
+      
+    e.append(percentiles)
+    
+
 
     text =  minidom.parseString(ElementTree.tostring(subtree[0])).toprettyxml()
     # remove blank lines
@@ -542,14 +581,44 @@ def createPhyloXML(fam,alignmentDict,newick,results):
 if __name__ == "__main__":
   sys.setrecursionlimit(15000)
 
+  parser = argparse.ArgumentParser(description='Generate an XML file from \
+      a tree, an alignment and statistics.')
+  ## Files
+  parser.add_argument('-t', '--tree', dest='treeFile', action='store',\
+      required=True,\
+      help='File containing a tree in Newick format')
+  parser.add_argument('-a', '--align', dest='alignmentFile', action='store',\
+      required=True,\
+      help='File containing an alignment in FASTA format')
+  parser.add_argument('-r', '--results', dest='resultsFile', action='store',\
+      required=False,\
+      help='File containing the results')
+  parser.add_argument('-o', '--output', dest='output', action='store',\
+      help='Name of the output XML file (if not specified, the XML will have \
+      the same name as the tree file)')
+  parser.add_argument('-e', '--exp', dest='exprcol', action='store', type=str,\
+      default=1,\
+      help='Formula to be applied on the column values')
+  parser.add_argument('-n', '--nostat', dest='nostat', action='store', type=float,\
+      default=-1.0,\
+      help='Value to use in case there is no statistic associated\
+      with a site in the sequence')
+  ## Toggles
+  parser.add_argument('--skipmissing', dest='skipMissingSites', action='store_true',\
+      required=False,\
+      help='Prevent the addition of special values (-n, --nostat) for sites that are absent from the results file. \
+          This results in sites being next to each other on the graph even though their positions are distant.')
+  args = parser.parse_args()
+
   if args.resultsFile:
     results, sites = loadResultsBranchSite(args.resultsFile)
     print("Results read")
   else:
     sites = []
-    
+
   # Return Alignement & tree (&results)
   alignmentDict, tree, resulttmp = ASR_compute(args.alignmentFile, args.treeFile, sites)
+  ### Each sequence is a list of states
   
   if not args.resultsFile:
     results = resulttmp

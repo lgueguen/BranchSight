@@ -1,1 +1,0 @@
-(Sequence_A:2.0,(Sequence_B:2.0,Sequence_C:1.0):1.0);

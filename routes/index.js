@@ -66,6 +66,7 @@ router.post("/upload_files", upload.fields([
         });
     }
     
+  var xml_digester = require("xml-digester");
   var fname_xml = currentTimestampMs
     + '-'+fname_t.split('-')[1]
     + '-'+fname_a.split('-')[1]
@@ -77,7 +78,8 @@ router.post("/upload_files", upload.fields([
   var branchSite;
   var logBranchLength = req.body.logBranchLength;
   var isNuc = req.body.isNuc;
-
+  var percentiles = xml_digester.XmlDigester(req.body.Percentiles);
+    
   isNuc = (isNuc != undefined ? true : false);
   logBranchLength = (logBranchLength != undefined ? true : false);
   branchSite = true; //(resultsType == 'branchSiteMode' ? true : false);
@@ -132,7 +134,6 @@ router.post("/upload_files", upload.fields([
       if (err) {
         res.render('error.ejs', {message:"Erreur de lecture",error:err});
       }
-      var xml_digester = require("xml-digester");
       var handler = new xml_digester.OrderedElementsHandler("eventType");
       var options = {
         "handler": [{
@@ -156,8 +157,8 @@ router.post("/upload_files", upload.fields([
           branchSite: branchSite,
           logBranchLength: logBranchLength,
           isNuc: isNuc,
-          minThreshold: "0.2",
-          maxThreshold: "0.8"
+          minThreshold: percentiles["p0.95"],
+          maxThreshold: percentiles["p0.99"]
         });
         if (fileRemoval) {
           console.log('Deleting XML file');
@@ -206,6 +207,8 @@ router.get('/display_example', function(req, res) {
       }
       var JSONtree = JSON.stringify(results);
       var JSONpattern = JSON.stringify(""); // Sequence to highlight
+      var percentiles = xml_digester.XmlDigester(req.body.Percentiles);
+      
       console.log('Rendering view');
       res.render('displaytree.ejs',
       {
@@ -213,8 +216,8 @@ router.get('/display_example', function(req, res) {
         pattern: JSONpattern,
         branchSite: true,
         logBranchLength: true,
-        minThreshold: "0.2",
-        maxThreshold: "0.8"
+        minThreshold: percentiles["p0.95"],
+        maxThreshold: percentiles["p0.99"]
       });
     });
   });
