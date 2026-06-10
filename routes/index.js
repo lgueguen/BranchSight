@@ -182,7 +182,7 @@ router.post("/upload_files", upload.fields([
 router.get('/display_example', function(req, res) {
   // Read XML tree as JSON and display data
 
-  const fname = 'examples/basic_example/4_basic_example_branch_site.xml';
+  const fname = 'examples/APOBE3G_dN.xml';
 
   fs.readFile(fname, 'utf8' , (err, data) => {
     if (err) {
