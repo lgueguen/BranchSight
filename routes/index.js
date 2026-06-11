@@ -78,8 +78,6 @@ router.post("/upload_files", upload.fields([
   var branchSite;
   var logBranchLength = req.body.logBranchLength;
   var isNuc = req.body.isNuc;
-  var percentiles = xml_digester.XmlDigester(req.body.Percentiles);
-    
   isNuc = (isNuc != undefined ? true : false);
   logBranchLength = (logBranchLength != undefined ? true : false);
   branchSite = true; //(resultsType == 'branchSiteMode' ? true : false);
@@ -147,6 +145,9 @@ router.post("/upload_files", upload.fields([
           console.log(err);
           return;
         }
+
+        var p095 = results.phyloxml.phylogeny.Percentiles["p0.95"] ; 
+        var p099 = results.phyloxml.phylogeny.Percentiles["p0.99"] ; 
         var JSONtree = JSON.stringify(results);
         var JSONpattern = JSON.stringify(""); // Sequence to highlight
         console.log('Rendering view');
@@ -157,8 +158,8 @@ router.post("/upload_files", upload.fields([
           branchSite: branchSite,
           logBranchLength: logBranchLength,
           isNuc: isNuc,
-          minThreshold: percentiles["p0.95"],
-          maxThreshold: percentiles["p0.99"]
+          minThreshold: p095,
+          maxThreshold: p099
         });
         if (fileRemoval) {
           console.log('Deleting XML file');
@@ -205,10 +206,11 @@ router.get('/display_example', function(req, res) {
         console.log(err);
         return;
       }
+      var p095 = results.phyloxml.phylogeny.Percentiles["p0.95"] ; 
+      var p099 = results.phyloxml.phylogeny.Percentiles["p0.99"] ; 
       var JSONtree = JSON.stringify(results);
       var JSONpattern = JSON.stringify(""); // Sequence to highlight
-      var percentiles = xml_digester.XmlDigester(req.body.Percentiles);
-      
+
       console.log('Rendering view');
       res.render('displaytree.ejs',
       {
@@ -216,8 +218,8 @@ router.get('/display_example', function(req, res) {
         pattern: JSONpattern,
         branchSite: true,
         logBranchLength: true,
-        minThreshold: percentiles["p0.95"],
-        maxThreshold: percentiles["p0.99"]
+        minThreshold: p095,
+        maxThreshold: p099
       });
     });
   });
