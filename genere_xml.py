@@ -156,7 +156,8 @@ def loadAlignment(alignmentFile, sites = []):
 
     ## Take only assigned sites
     lenseq=len(alignmentDict[list(alignmentDict.keys())[0]])
-    
+
+    isCodon = False
     if sites==[]:
       isCodon = test_is_coding(alignmentDict)
       if isCodon:
