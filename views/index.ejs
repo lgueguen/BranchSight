@@ -222,7 +222,7 @@ Modified by Laurent GUÉGUEN, 6 March 2023
     
     $('input[type="file"]').change(function(e) {
       var filename = e.target.files[0].name;
-      console.log('File changed on input with id: ' + e.target.id);
+      //console.log('File changed on input with id: ' + e.target.id);
       var selectedFile = document.getElementById(e.target.id).files[0];
       // var content = document.getElementById(e.target.id.split('-')[0]+'-file-content');
       var reader = new FileReader();
@@ -231,7 +231,7 @@ Modified by Laurent GUÉGUEN, 6 March 2023
         var treeRegex = new RegExp('^[\(][A-Za-z0-9\.\-_,\(\):;]+');
         var alignmentRegex = new RegExp('^>.*(\r)?\n[ACGTU\-]+');
         var resultsRegex = new RegExp('[0-9]+((\t| )[\-]?[0-9]+[\.]?[0-9]+)+');
-        console.log(reader.result);
+        //console.log(reader.result);
         var isMatch = null;
         if (e.target.id.substring(0, 4) === 'tree') {
           isMatch = treeRegex.test(reader.result);
@@ -240,9 +240,9 @@ Modified by Laurent GUÉGUEN, 6 March 2023
         } else if (e.target.id.substring(0, 4) === 'resu') {
           isMatch = resultsRegex.test(reader.result);
         } else {
-          console.log('Unrecognized ID: '+e.target.id);
+          //console.log('Unrecognized ID: '+e.target.id);
         }
-        console.log(isMatch);
+        //console.log(isMatch);
         if (isMatch) {
           $("#"+e.target.id+" + .filename").html(checkIconHTML+'<br/>'+filename); 
         } else {
@@ -251,7 +251,7 @@ Modified by Laurent GUÉGUEN, 6 March 2023
         // content.innerHTML = '';
         for (var i = 0; i < Math.min(lines.length, 4); i ++) {
           // content.innerHTML += lines[i].substring(0, 80)+'<br>';
-          console.log(lines[i].substring(0, 80));
+          //console.log(lines[i].substring(0, 80));
         }
       };
       reader.readAsText(selectedFile);

@@ -102,12 +102,17 @@ var hStep;                      // Epaisseur du carré ( different si aa ou dna)
 var alignmentLetterNormalSpacing = hStepBase - 10;
 var alignmentLetterSmallSpacing = 0; 
 var alignmentLetterSpacing =  alignmentLetterNormalSpacing;
-var psThresholdHigh = parseFloat($('#ps-threshold-high').val()) || parseFloat(1.0);
-var psThresholdLow = parseFloat($('#ps-threshold-low').val()) || parseFloat(0.9);
-var psThresholdHighBgColor = "#FF0000";
-var psThresholdLowBgColor = "#FFFF00";
-var psBelowThresholdBgColor = "#DDDDDD";
+var psThresholdMaxUp = parseFloat($('#ps-threshold-max-up').val()) || parseFloat(1.0);
+var psThresholdMinUp = parseFloat($('#ps-threshold-min-up').val()) || parseFloat(0.9);
+var psThresholdMinDown = parseFloat($('#ps-threshold-min-down').val()) || parseFloat(-0.9);
+var psThresholdMaxDown = parseFloat($('#ps-threshold-max-down').val()) || parseFloat(-1.0);
+var psThresholdMaxUpBgColor = "#FF0000";
+var psThresholdMinUpBgColor = "#FFFF00";
+var psThresholdMaxDownBgColor = "#0000FF";
+var psThresholdMinDownBgColor = "#00FFFF";
+var psNormalThresholdBgColor = "#DDDDDD";
 var psMissingBgColor = "#faf0e6";
+
 var seq_lg = xmlparser.flatTree(recTree.phyloxml.phylogeny.maxSeqIdLength)*10;
 var isDNA = (xmlparser.flatTree(recTree.phyloxml.phylogeny.size.isDNA)=="true");
 var isCodon = (xmlparser.flatTree(recTree.phyloxml.phylogeny.size.isCodon)=="true");
@@ -134,7 +139,7 @@ var nbSites = 0;
 var upperThresholdMode = true;
 var modStepX = 150; // Pas de la variation en largeur
 var modStepY = 5;   // Pas de la variation en hauteur
-var stats_type  = "max";
+var stats_type  = "proportion";
 
 // Dico des aa ( a ameliorer)
 // ==========================
@@ -331,12 +336,12 @@ function updateLayout(cRoot,firstLoad=0,scrolling=1) {
   if (tagSimpleGene) {
       if (firstLoad == 1) {
         var max_tree_length =  getmaxlength(treeRoot,0);
-        console.log("MAX TREE LENGTH SIMPLE "+max_tree_length);
-        console.log("MAX TREE nodeWidth 1 "+nodeWidth);
+        //console.log("MAX TREE LENGTH SIMPLE "+max_tree_length);
+        //console.log("MAX TREE nodeWidth 1 "+nodeWidth);
         if (max_tree_length > 0) {
           nodeWidth = Math.floor(nodeWidth / max_tree_length) * 3.0;
         }
-        console.log("MAX TREE nodeWidth 2"+nodeWidth);
+        //console.log("MAX TREE nodeWidth 2"+nodeWidth);
     };
     phylogeny(treeRoot,nodeWidth);
   } else {
@@ -363,11 +368,11 @@ function updateLayout(cRoot,firstLoad=0,scrolling=1) {
       var leaf_name = d.data.name;
       var col_aas = [];
       var col_dnas = [];
-      console.log("SEQUENCE NAME = " + leaf_name);
+      //console.log("SEQUENCE NAME = " + leaf_name);
       var dna_sequence = d.data.lastEvent.dnaAlign;
       var aa_sequence = d.data.lastEvent.aaAlign;
       var aas = aa_sequence.split("");
-      console.log("AA "+aa_sequence)
+      //console.log("AA "+aa_sequence)
       aas.forEach (function (aa,j) {
         var col = hslaa[aa];
         if (col == undefined) {
@@ -386,10 +391,10 @@ function updateLayout(cRoot,firstLoad=0,scrolling=1) {
           var col = "grey";
           if (flag_redond == -1) {
             col = colordna_red[codon];
-              console.log("redundant color "+ col);
+              //console.log("redundant color "+ col);
           } else {
              col = colordna[codon];
-              console.log("classical color "+ col);
+              //console.log("classical color "+ col);
           }
           if (col == undefined) {col = "grey"};
           col_dnas.push([col,codon]);
@@ -399,7 +404,7 @@ function updateLayout(cRoot,firstLoad=0,scrolling=1) {
     })
   }
   updateSvg(treeRoot,firstLoad);
-  console.log("SCROLLING "+scrolling)
+  //console.log("SCROLLING "+scrolling)
   if (scrolling == 1) {
   updateScroll();
   }
@@ -408,7 +413,7 @@ function updateLayout(cRoot,firstLoad=0,scrolling=1) {
 // Fonction principale : mise a jour du svg
 // ----------------------------------------
 function updateSvg(treeRoot,firstLoad ,config = {}) {
-  console.log('Start updatesvg');
+  //console.log('Start updatesvg');
   // Suppression de l'ancien affichage de l'alignement et du graphe
   d3.selectAll('#ps-graph, #sequences-container').remove();
   // ====================================================
@@ -802,7 +807,7 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
     flag = !e.children;
     return !flag;
   }); 
-  console.log("internal "+internal_nodes) 
+  //console.log("internal "+internal_nodes) 
   var widthSVG0 = resultsJSON.length;
   var heightSVG0 = 60;
   var psGraphGlobalWidth = resultsJSON.length;
@@ -994,7 +999,7 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
       })
       .on('mouseout', hideTooltip)
       .on('click', function(index,d) {
-        console.log("click " + index + "=>"+d);
+        //console.log("click " + index + "=>"+d);
         writeTooltip(d);
         showTooltip();
         updateNodeColorsOnClick(d);
@@ -1042,7 +1047,7 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
       })
       .on('mouseout', hideTooltip)
       .on('click', function(index,d) {
-        console.log("click " + index + "=>"+d);
+        //console.log("click " + index + "=>"+d);
         writeTooltip(d);
         showTooltip();
         updateNodeColorsOnClick(d);
@@ -1054,21 +1059,21 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
   // Ajout du seuil supérieur au graphe
   psGraph.append('line')
     .attr('x1', x(1))
-    .attr('y1', y(psThresholdHigh))
+    .attr('y1', y(psThresholdMaxUp))
     .attr('x2', x(resultsJSON.length+1))
-    .attr('y2', y(psThresholdHigh))
+    .attr('y2', y(psThresholdMaxUp))
     .style('stroke', '#000000')
-    // .style('stroke', psThresholdHighBgColor)
+    // .style('stroke', psThresholdMaxUpBgColor)
     .style('stroke-width', '2')
     .style('stroke-dasharray', ('4, 4'));
   // Ajout du seuil inférieur au graphe
   psGraph.append('line')
     .attr('x1', x(1))
-    .attr('y1', y(psThresholdLow))
+    .attr('y1', y(psThresholdMinUp))
     .attr('x2', x(resultsJSON.length+1))
-    .attr('y2', y(psThresholdLow))
+    .attr('y2', y(psThresholdMinUp))
     .style('stroke', '#000000')
-    // .style('stroke', psThresholdLowBgColor)
+    // .style('stroke', psThresholdMinUpBgColor)
     .style('stroke-width', '1')
     .style('stroke-dasharray', ('4, 4'));
   psGraph.append('br');
@@ -1100,11 +1105,11 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
     
   var internal_sequences = internal_nodes.filter(function(d) {return (true);});
   internal_nodes.forEach (function (d,i) {
-    console.log("debug inter "+ d.data.name)
-    console.log("debug inter "+ d.data.nbseqspe.nbSeq)
+    //console.log("debug inter "+ d.data.name)
+    //console.log("debug inter "+ d.data.nbseqspe.nbSeq)
     // if d.data.nodeinfo === "collapsed"
     if (d.data.nodeinfo) {
-      console.log("debug inter "+ d.data.name)
+      //console.log("debug inter "+ d.data.name)
     }
     var leaf_name = d.data.lastEvent.name;
     var dna_sequence = d.data.lastEvent.dnaAlign;
@@ -1199,7 +1204,7 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
     var seqname =  d.data.name;
     var aas = dico_aa[seqname];
     
-    console.log("AA2 "+aas)
+    //console.log("AA2 "+aas)
     if (aas != undefined) {
       aas.forEach (function (aa,j) {
         var opac =  getOpacFromResult(resultsJSON[j]);
@@ -1236,7 +1241,7 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
         })
     }
     });
-  console.log("aa_dataset and dna_dataset OK");
+  //console.log("aa_dataset and dna_dataset OK");
   // seqTextAA.append('text')
   //   .style('letter-spacing', (alignmentLetterSpacing)+'px') // Espacement des lettres pour correpondre au graphe
   //   .style("font-size",fitPoliceSize+"px")
@@ -1437,7 +1442,7 @@ function define_colordna (){
       for (i = 0; i < _codons.length; i++) {
         var _hsl =  hslaa[d];
         var new_hsl = [_hsl[0],_hsl[1],_hsl[2] + Math.floor(i* step_satur / _codons.length)];
-        console.log(_codons[i]+ ": avant "+ colordna[_codons[i]]+ ", apres "+ hsl2col(new_hsl));
+        //console.log(_codons[i]+ ": avant "+ colordna[_codons[i]]+ ", apres "+ hsl2col(new_hsl));
         colordna_red[_codons[i]] = hsl2col(new_hsl);
       }
     }
@@ -1447,23 +1452,23 @@ function define_colordna (){
 // -----------------------------------
 function getColorFromResult(res) {
   if (upperThresholdMode) {
-    if (res >= psThresholdHigh) {
-      return psThresholdHighBgColor;
-    } else if (res >= psThresholdLow) {
-      return psThresholdLowBgColor;
+    if (res >= psThresholdMaxUp) {
+      return psThresholdMaxUpBgColor;
+    } else if (res >= psThresholdMinUp) {
+      return psThresholdMinUpBgColor;
     } else if (res != 0) {
-      return psBelowThresholdBgColor;
+      return psNormalThresholdBgColor;
     } else {
       return psMissingBgColor;
     }
   } else {
-    if (res <= psThresholdLow) {
-      return psThresholdHighBgColor;
-    } else if (res <= psThresholdHigh) {
-        return psThresholdLowBgColor;
+    if (res <= psThresholdMaxDown) {
+      return psThresholdMaxDownBgColor;
+    } else if (res <= psThresholdMinDown) {
+        return psThresholdMinDownBgColor;
     } else {
         if (res != 0) {
-          return psBelowThresholdBgColor;
+          return psNormalThresholdBgColor;
         } else {
           return psMissingBgColor;
         }
@@ -1475,33 +1480,25 @@ function getColorFromResult(res) {
 // ----------------------------------
 function getOpacFromResult(res) {
   if (upperThresholdMode) {
-    if (res >= psThresholdHigh) {
-      //return psThresholdHighBgColor;
+    if (res >= psThresholdMaxUp) {
       return 1.0;
-    } else if (res >= psThresholdLow) {
-//      return psThresholdLowBgColor;
+    } else if (res >= psThresholdMinUp) {
       return 0.5;
     } else if (res >= 0) {
-      //return psBelowThresholdBgColor;
       return 0.0;
     } else {
-      //return psMissingBgColor;
       return 0.0;
     }
   } else {
     if (res >= 0) {
-      if (res <= psThresholdLow) {
-        //return psThresholdHighBgColor;
+      if (res <= psThresholdMaxDown) {
         return 1.0;
-      } else if (res <= psThresholdHigh) {
-        //return psThresholdLowBgColor;
-        return 0.0;
+      } else if (res <= psThresholdMinDown) {
+        return 0.5;
       } else {
-        //return psBelowThresholdBgColor;
         return 0.0;
       }
     } else {
-      // return psMissingBgColor;
       return 0.0;
     }
   }
@@ -1548,7 +1545,6 @@ function updateNodeColors() {
   g.selectAll('path.symbol')
     .style('fill', function(d) {
       if (d.data.branch_info) {
-        // var positiveRate = getPositiveRateJSON(d.data.branch_info.results, leftBoundary, rightBoundary).toFixed(3);
         var positiveRate = getPositiveStatsJSON(stats_type,d.data.branch_info.results, leftBoundary, rightBoundary).toFixed(3);
         return colorByRate(positiveRate);
       }
@@ -1557,7 +1553,6 @@ function updateNodeColors() {
   g.selectAll('path.link')
     .style('stroke', function(d) {
       if (d.target.data.branch_info) {
-        // var positiveRate = getPositiveRateJSON(d.target.data.branch_info.results, leftBoundary, rightBoundary).toFixed(3);
         var positiveRate = getPositiveStatsJSON(stats_type,d.target.data.branch_info.results, leftBoundary, rightBoundary).toFixed(3);
         return colorByRate(positiveRate);
       }
@@ -1579,28 +1574,26 @@ function updateNodeColorsOnClick(x) {
   g.selectAll('path.symbol')
     .style('fill', function(d) {
       if (d.data.branch_info) {
-        // var positiveRate = getPositiveStatsJSON(stats_type,d.data.branch_info.results, x,x).toFixed(3);
         var positiveRate = getValueJSON(d.data.branch_info.results, x).toFixed(3);
-        console.log("debug positive "+positiveRate)
+        //console.log("debug positive "+positiveRate)
         if (positiveRate < 0) {
-          console.log("debug no data "+d.data.branch_info.results);
+          //console.log("debug no data "+d.data.branch_info.results);
         } 
         return colorByRate(positiveRate);
       }
       else {
-        console.log("debug no data "+d)
+        //console.log("debug no data "+d)
       }
     });
   // The color of a branch depends on the number of positive sites in its node
   g.selectAll('path.link')
     .style('stroke', function(d) {
       if (d.target.data.branch_info) {
-        // var positiveRate = getPositiveStatsJSON(stats_type,d.target.data.branch_info.results, x,x).toFixed(3);
         var positiveRate = getValueJSON(d.target.data.branch_info.results, x).toFixed(3);
         return colorByRate(positiveRate);
       }
       else {
-        console.log("debug2 no data "+d)
+        //console.log("debug2 no data "+d)
       }
     });
 
@@ -1651,12 +1644,12 @@ function writeTooltip(text) { $('.tooltip').text(text); }
 
 // Get the the value of the selected stat the indicated boundaries
 // --------------------------------------------------------------
-function getPositiveStatsJSON(stat_type,textResultsList, leftB, rightB) {
-  switch (stat_type) {
-    case "rate":
+function getPositiveStatsJSON(stats_type,textResultsList, leftB, rightB) {
+  switch (stats_type) {
+    case "proportion":
       return(getPositiveRateJSON(textResultsList, leftB, rightB));
       break;
-    case "max":
+    case "extreme":
       return(getPositiveMaxJSON(textResultsList, leftB, rightB));
       break;  
     default:
@@ -1674,16 +1667,16 @@ function getPositiveRateJSON(textResultsList, leftB, rightB) {
   var nbPos = 0;
   jsonResultsList.forEach((value, site) => {
     if (upperThresholdMode) {
-      if (value >= psThresholdHigh && site >= leftB && site <= rightB) {
+      if (value >= psThresholdMaxUp && site >= leftB && site <= rightB) {
         nbPos ++;
       }
     } else {
-      if (value >= 0 && value <= psThresholdLow && site >= leftB && site <= rightB) {
+      if (value >= 0 && value <= psThresholdMaxDown && site >= leftB && site <= rightB) {
         nbPos ++;
       }
     }
   });
-  console.log("positive selection = "+ nbPos/(rightBoundary - leftBoundary + 1))
+  //console.log("Fraction beyond limit = "+ nbPos/(rightBoundary - leftBoundary + 1))
   return nbPos/(rightBoundary - leftBoundary + 1);
 }
 
@@ -1692,15 +1685,27 @@ function getPositiveRateJSON(textResultsList, leftB, rightB) {
 function getPositiveMaxJSON(textResultsList, leftB, rightB) {
   var jsonResultsList = JSON.parse(textResultsList);
   var  posMax = 0;
+  if (upperThresholdMode) {
+  posMax = -100000;
+  } else {
+  posMax = 100000;
+  }
+  
   jsonResultsList.forEach((value, site) => {
+    if (upperThresholdMode) {
       if (value >  posMax && site >= leftB && site <= rightB) {
         posMax = value;
       }
-    
+     } else {
+      if (value <  posMax && site >= leftB && site <= rightB) {
+        posMax = value;
+      }
+     }    
   });
-  console.log("positive selection = "+posMax);
+  //console.log("Extreme value = "+posMax);
   return posMax;
-}
+  }
+  
 // Get the value  at a  site 
 // --------------------------------------------------------------
 function getValueJSON(textResultsList, position_x) {
@@ -1712,9 +1717,10 @@ function getValueJSON(textResultsList, position_x) {
       }
     
   });
-  console.log("positive value = "+valuePos);
+  //console.log("value = "+valuePos);
   return valuePos;
-}
+  }
+  
 // Fonction de test du support local.storage
 // ------------------------------------------
 // https://michalzalecki.com/why-using-localStorage-directly-is-a-bad-idea/
@@ -1727,7 +1733,8 @@ function isStorageSupported(storage) {
   } catch (e) {
     return false;
   }
-}
+  }
+  
 // Fonction sauve le svg de l'arbre
 // ---------------------------------
 function saveSVGTree(){
@@ -1974,8 +1981,8 @@ function getSpec (noeud) {
       specs.push(lastEvent.speciesLocation)
     }
     else {
-      console.log(" ERROR : NO EVENTS FOR ");
-      console.log(noeud.data);
+      //console.log(" ERROR : NO EVENTS FOR ");
+      //console.log(noeud.data);
     }
     return specs;
   }
@@ -2038,7 +2045,7 @@ function collapseVeryBigTree(treeRoot,patterns) {
               for(var exKey in cross) {
                 var nomFeuille = cross[exKey];
                 if (nomFeuille === nomPattern){
-                  console.log("FIND PATTERN "+nomFeuille);
+                  //console.log("FIND PATTERN "+nomFeuille);
                   focusNode = d;
                 }
               }
@@ -2058,13 +2065,13 @@ function collapseVeryBigTree(treeRoot,patterns) {
           }
         }
         else {
-          console.log("PATTERN NOT FOUND : "+nomPattern);
+          //console.log("PATTERN NOT FOUND : "+nomPattern);
         }
       });
     });
   }
   else {
-    console.log("NO PATTERN")
+    //console.log("NO PATTERN")
     treeRoot.each(function (d) {
       if ((d.depth == 5) || (d.depth == 10) ||(d.depth == 30)|| (d.depth == 60)|| (d.depth == 90) ) {
         acollapser.push(d)
@@ -2072,7 +2079,7 @@ function collapseVeryBigTree(treeRoot,patterns) {
     });
   }
   acollapser.forEach(function (d) {
-    console.log('collapseVeryBigTree: acollapser');
+    //console.log('collapseVeryBigTree: acollapser');
     if (d.data.clade) {
       // if (collapseMode == 'collapseOn') {
       d.data._clade = d.data.clade;
@@ -2191,24 +2198,24 @@ $('#action').ready(function() {
 $('#stats').on('click', function(event, dropdownData) {
   var target = event.toElement || event.relatedTarget || event.target || function () { throw "Failed to attach an event target!"; }
   myStorage.setItem("stats",target.text);
-  console.log("DEBUG STATS "+target.text);
+  //console.log("DEBUG STATS "+target.text);
   $('#button_stats').text(target.text);
   switch (target.text) {
-    case "Rate":
-      stats_type = "rate";
+    case "Proportion":
+      stats_type = "proportion";
       $('#branch-stats').css('color','#000000');
       $('#rate').css('color','#FF0000');
-      $('#max').css('color','#000000');      
+      $('#extreme').css('color','#000000');      
       break;
-    case "Maximum":
-      stats_type = "max";
+    case "Extreme":
+      stats_type = "extreme";
       $('#branch-stats').css('color','#000000');
       $('#rate').css('color','#000000');
-      $('#max').css('color','#FF0000');      
+      $('#extreme').css('color','#FF0000');      
       break;
     default:
   }
-console.log("DEBUG STATS "+stats_type);
+//console.log("DEBUG STATS "+stats_type);
 if (target.text != undefined) {
   updateLayout(cladeRoot,0,0);
 }
@@ -2217,7 +2224,7 @@ if (target.text != undefined) {
 $('#action').on('click', function(event, dropdownData) {
   var target = event.toElement || event.relatedTarget || event.target || function () { throw "Failed to attach an event target!"; }
   myStorage.setItem("action",target.text);
-  console.log("DEBUG ACTION "+target.text);
+  //console.log("DEBUG ACTION "+target.text);
   $('#button_action').text(target.text);
   switch (target.text) {
     case "View Branch Results":
@@ -2250,7 +2257,7 @@ $('#action').on('click', function(event, dropdownData) {
       break;
     default:
   }
-console.log("DEBUG "+action);
+//console.log("DEBUG "+action);
 if (target.text != undefined) {
   updateLayout(cladeRoot,0,0);
 }
@@ -2313,7 +2320,7 @@ $('#moreHeigth').on('click', function(event, dropdownData) {
       fitPoliceSize = fitNormalPoliceSize;
       alignmentLetterSpacing = alignmentLetterNormalSpacing;
     } 
-  console.log("node = "+nodeHeight+"; letter = "+hLetter);
+  //console.log("node = "+nodeHeight+"; letter = "+hLetter);
   updateLayout(cladeRoot);
 });
 $('#lessHeigth').on('click', function(event, dropdownData) {
@@ -2331,18 +2338,18 @@ $('#lessHeigth').on('click', function(event, dropdownData) {
       alignmentLetterSpacing = alignmentLetterSmallSpacing;
       fitPoliceSize = fitSmallPoliceSize;
     }    
-      console.log("node = "+nodeHeight+"; letter = "+hLetter);
+      //console.log("node = "+nodeHeight+"; letter = "+hLetter);
     updateLayout(cladeRoot);
   }
 });
 $('#redondance').on('click', function(event, dropdownData) {
     flag_redond = - flag_redond;
-    console.log("REDOND "+flag_redond);
+    //console.log("REDOND "+flag_redond);
     updateLayout(cladeRoot,2);
 });
 $('#histogram').on('click', function(event, dropdownData) {
     flag_histogram = - flag_histogram;
-    console.log("HISTO "+flag_histogram);
+    //console.log("HISTO "+flag_histogram);
     updateLayout(cladeRoot);
 });
 $('#export').on('click', function(event, dropdownData) {
@@ -2455,31 +2462,36 @@ $(document).ready(function() {
       default:
     }
   });
+
   // Gestion de la modification des seuils
   $('#ps-threshold-high, #ps-threshold-low').on('change', function(event) {
     // On a modifié un des seuils
     // psThresholdsChanged = true;
     // Correction des valeurs en présence d'incohérences
-    var psHighVal = parseFloat($('#ps-threshold-high').val());
-    var psLowVal = parseFloat($('#ps-threshold-low').val());
-    if (psHighVal < psLowVal) {
+    var psMaxUp = parseFloat($('#ps-threshold-max-up').val());
+    var psMinUp = parseFloat($('#ps-threshold-min-up').val());
+    var psMaxDown = parseFloat($('#ps-threshold-max-down').val());
+    var psMinDown = parseFloat($('#ps-threshold-min-down').val());
+    if (psMaxUp < psMinUp) {
       if (event.currentTarget.id == 'ps-threshold-high') {
         // On a descendu le seuil supérieur plus bas que le seuil inférieur
         // ex : psHighVal = 0.95 | psLowVal = 1.0
         // On veut donc redecsendre le seuil inférieur en conséquence
         $('#ps-threshold-low').val(psHighVal);
-        psLowVal = psHighVal;
+        psMaxUp = psMinDown;
       } else {
         // On a monté le seuil inférieur plus haut que le seuil supérieur
         // ex : psHighVal = 1.0 | psLowVal = 1.05
         // On veut donc remonter le seuil supérieur en conséquence
         $('#ps-threshold-high').val(psLowVal);
-        psHighVal = psLowVal;
+        psMinUp = psMaxDown;
       }
     }
     // Réaffectation des variables globales
-    psThresholdHigh = psHighVal;
-    psThresholdLow = psLowVal;
+    psThresholdMaxUp = psMaxUp;
+    psThresholdMaxDown = psMaxDown;
+    psThresholdMinUp = psMinUp;
+    psThresholdMinDown = psMinDown;
     updateLayout(cladeRoot);
   });
 });

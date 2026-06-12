@@ -239,7 +239,7 @@
           selectedSpecies = selectedSpecies + selectedSpecArray[i] +";";
         }
       }
-      console.log(selectedSpecies);
+      //console.log(selectedSpecies);
       myStorage.setItem("selectedSpecies",selectedSpecies);
   }
 
@@ -272,7 +272,7 @@
 
   // Fonction Ajout de taxon
   function addTaxonField(e){
-      console.log("ADDTAXON");
+      //console.log("ADDTAXON");
       var taxonSelection = $('#taxonselection');
       var species =  taxonSelection[0].value ;
       var colorSelection = $('#colorselection');
@@ -291,7 +291,7 @@
       for (var i = 0; i < arrayLength-1; i++) {
         var specColor = selectedSpecArray[i].split("::");
         if (species === specColor[0]) {
-          console.log("ALREADY DEFINED "+ specColor[0]);
+          //console.log("ALREADY DEFINED "+ specColor[0]);
           specColor[1]=color;
           flagModif = 1;
         }

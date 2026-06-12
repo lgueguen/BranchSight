@@ -11,8 +11,8 @@
   </button>
   <ul class="dropdown-menu" aria-labelledby="stats">
     <li><a id="branch-stats" class="dropdown-item" href="#">Choose stats</a></li>
-    <li><a id="rate" class="dropdown-item" href="#">Rate</a></li>
-    <li><a id="max" class="dropdown-item" href="#">Maximum</a></li>
+    <li><a id="rate" class="dropdown-item" href="#">Proportion</a></li>
+    <li><a id="extreme" class="dropdown-item" href="#">Extreme</a></li>
   </ul>
 </div>
 
@@ -96,9 +96,11 @@
 <div id="thresholds-group" class="btn-group" role="group" aria-label="">
   <button class="btn btn-sm btn-outline-secondary">
     <div class="input-group align-items-center">
-      <label for="ps-threshold-low">Thresholds</label>
-      <input id="ps-threshold-low"  placeholder="PS Threshold" value= "<%- minThreshold %>" style="width: 5em;"/>
-      <input id="ps-threshold-high" placeholder="PS Threshold" value= "<%- maxThreshold %>" style="width: 5em;"/>
+      <label for="ps-threshold-up">Thresholds</label>
+      <input id="ps-threshold-max-down" placeholder="PS Threshold" value= "<%- maxThresholdDown %>" style="width: 5em;"/>
+      <input id="ps-threshold-min-down"  placeholder="PS Threshold" value= "<%- minThresholdDown %>" style="width: 5em;"/>
+      <input id="ps-threshold-min-up"  placeholder="PS Threshold" value= "<%- minThresholdUp %>" style="width: 5em;"/>
+      <input id="ps-threshold-max-up" placeholder="PS Threshold" value= "<%- maxThresholdUp %>" style="width: 5em;"/>
     </div>
   </button>
   <div>

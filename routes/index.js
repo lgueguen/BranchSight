@@ -124,7 +124,7 @@ router.post("/upload_files", upload.fields([
     if (stderr) {
       console.log(`error: ${stderr}`);
     }
-    console.log(`${stdout}`);
+    //console.log(`${stdout}`);
     
     // Read XML tree as JSON and display data
     const fname = full_path_xml;
@@ -146,6 +146,8 @@ router.post("/upload_files", upload.fields([
           return;
         }
 
+        var p001 = results.phyloxml.phylogeny.Percentiles["p0.01"] ; 
+        var p005 = results.phyloxml.phylogeny.Percentiles["p0.05"] ; 
         var p095 = results.phyloxml.phylogeny.Percentiles["p0.95"] ; 
         var p099 = results.phyloxml.phylogeny.Percentiles["p0.99"] ; 
         var JSONtree = JSON.stringify(results);
@@ -158,8 +160,10 @@ router.post("/upload_files", upload.fields([
           branchSite: branchSite,
           logBranchLength: logBranchLength,
           isNuc: isNuc,
-          minThreshold: p095,
-          maxThreshold: p099
+          minThresholdUp: p095,
+          maxThresholdUp: p099,
+          minThresholdDown: p005,
+          maxThresholdDown: p001
         });
         if (fileRemoval) {
           console.log('Deleting XML file');
@@ -172,7 +176,7 @@ router.post("/upload_files", upload.fields([
               if (stderr) {
                 console.log(`error: ${stderr}`);
               }
-              console.log(`${stdout}`);
+              //console.log(`${stdout}`);
             }
           )
         }
@@ -206,6 +210,8 @@ router.get('/display_example', function(req, res) {
         console.log(err);
         return;
       }
+      var p001 = results.phyloxml.phylogeny.Percentiles["p0.01"] ; 
+      var p005 = results.phyloxml.phylogeny.Percentiles["p0.05"] ; 
       var p095 = results.phyloxml.phylogeny.Percentiles["p0.95"] ; 
       var p099 = results.phyloxml.phylogeny.Percentiles["p0.99"] ; 
       var JSONtree = JSON.stringify(results);
@@ -218,8 +224,10 @@ router.get('/display_example', function(req, res) {
         pattern: JSONpattern,
         branchSite: true,
         logBranchLength: true,
-        minThreshold: p095,
-        maxThreshold: p099
+        minThresholdUp: p095,
+        maxThresholdUp: p099,
+        minThresholdDown: p005,
+        maxThresholdDown: p001
       });
     });
   });
