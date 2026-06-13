@@ -1182,7 +1182,7 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
   var aaSequence = d3.select('.aa-sequence');
   var dnaSequence = d3.select('.dna-sequence');
   var targetSequence = displaySeqType == 'AA' ? aaSequence : dnaSequence;
-  // Alignement : ajout des coelurs AA
+  // Alignement : ajout des couleurs AA
   console.log("Genere aa_dataset and dna_dataset");
   aa_dataset = [];
   dna_dataset = [];
@@ -1532,9 +1532,9 @@ function colorByRate(rate) {
     return 'hsl(0, 0%, '+(80-2*rate*100)+'%)';
   } else {
     if (upperThresholdMode) {
-        return 'hsl(0, 100%, '+(85 - 2*rate*100)+'%)';
+        return 'hsl(0, 100%, '+(85 * (1 - rate)^2)+'%)';
     } else {
-        return 'hsl(250, 100%, '+(85 - 2*rate*100)+'%)';
+        return 'hsl(250, 100%, '+(85 * (1 - rate)^2)+'%)';
     }
  }
 }
@@ -2485,7 +2485,7 @@ $(document).ready(function() {
   });
 
   // Gestion de la modification des seuils
-  $('#ps-threshold-high, #ps-threshold-low').on('change', function(event) {
+  $('#ps-threshold-max-down, #ps-threshold-min-down, #ps-threshold-min-up, #ps-threshold-max-up').on('change', function(event) {
     // On a modifié un des seuils
     // psThresholdsChanged = true;
     // Correction des valeurs en présence d'incohérences
@@ -2513,8 +2513,13 @@ $(document).ready(function() {
     psThresholdMaxDown = psMaxDown;
     psThresholdMinUp = psMinUp;
     psThresholdMinDown = psMinDown;
+    console.log(psThresholdMaxUp);
+    console.log(psThresholdMaxDown);
+    console.log(psThresholdMinUp);
+    console.log(psThresholdMinDown);
     updateLayout(cladeRoot);
   });
 });
+  
 </script>
 </html>
