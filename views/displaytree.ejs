@@ -1531,13 +1531,14 @@ function colorByRate(rate) {
   if (blackWhite) {
     return 'hsl(0, 0%, '+(80-2*rate*100)+'%)';
   } else {
-    if (rate > 0) {
-      return 'hsl(0, 100%, '+(85 - 2*rate*100)+'%)';
+    if (upperThresholdMode) {
+        return 'hsl(0, 100%, '+(85 - 2*rate*100)+'%)';
     } else {
-      return 'hsl(0, 0%, '+(80-2*rate*100)+'%)';
+        return 'hsl(250, 100%, '+(85 - 2*rate*100)+'%)';
     }
-  }
+ }
 }
+ 
 // Mise a jour de la couleur des noeuds
 // ------------------------------------
 function updateNodeColors() {
@@ -1546,14 +1547,14 @@ function updateNodeColors() {
 g.selectAll('path.symbol')
   .each(function(d) {
     if (d.data.branch_info) {
-      d.data.positiveRate = +getPositiveStatsJSON(
+      d.data.positiveRate = getPositiveStatsJSON(
         stats_type,
         d.data.branch_info.results,
         leftBoundary,
         rightBoundary
       ).toFixed(3);
-      console.log("DEBUG");
-      console.log(d);
+//      console.log("DEBUG");
+//      console.log(d);
 
     }
   });
@@ -1562,10 +1563,9 @@ g.selectAll('path.symbol')
   g.selectAll('path.symbol')
     .style('fill', function(d) {
       if (d.data.branch_info) {       
-        console.log("DATA ")
-        console.log(d.data)
-        // var positiveRate = getPositiveStatsJSON(stats_type,d.data.branch_info.results, leftBoundary, rightBoundary).toFixed(3);
-        var positiveRate = d.data.positiveRate;
+//        console.log("DATA ")
+//        console.log(d.data)
+          var positiveRate = d.data.positiveRate;
         return colorByRate(positiveRate);
       }
     });
@@ -1573,24 +1573,10 @@ g.selectAll('path.symbol')
   g.selectAll('path.link')
     .style('stroke', function(d) {
       if (d.target.data.branch_info) {
-        if  (d.target.data.positiveRate) {  
             var positiveRate = d.target.data.positiveRate;
             return colorByRate(positiveRate);
           }
-      }
     });
-
-    //   g.selectAll('path.link')
-    // .style('stroke', function(d) {
-    //   if (d.target.data.branch_info) {
-    //     console.log("TARGET ")
-    //     console.log(d.target)
-    //     var positiveRate = getPositiveStatsJSON(stats_type,d.target.data.branch_info.results, leftBoundary, rightBoundary).toFixed(3);
-    //     // var positiveRate = d.data.positiveRate;
-    //     return colorByRate(positiveRate);
-    //   }
-    // });
-
 
 
   // Selected node color and outline
