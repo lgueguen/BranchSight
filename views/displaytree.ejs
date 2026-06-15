@@ -430,26 +430,11 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
     margin : config.margin || { top: 10, down: 20, left: 500  , right: 50},
     color : config.color || {
       speciation : "#2F4F4F",
-      speciationOutLoss : "#2CA02C",
-      branchingOut : "#D62728",
-      speciationOut : "#2CA02C",
-      bifurcationOut : "#000000",
-      transferBack : "#D62728",
-      duplication : "#9467BD",
-      speciationLoss : "#1F77B4",
-      leaf : "#FF7F0E",
-      loss : "#000000"
+      leaf : "#FF7F0E"
     },
     symbols : config.symbols || {
       speciation : "symbolCircle",
-      collapsed : "symbolCircle",
-      speciationOutLoss : "symbolCircle",
-      branchingOut : "symbolSquare",
-      speciationOut : "symbolCircle",
-      bifurcationOut : "symbolCircle",
-      transferBack : "symbolDiamond",
-      duplication : "symbolSquare",
-      speciationLoss : "symbolCircle"
+      collapsed : "symbolCircle"
     }
   }
   var nodes = treeRoot.descendants();
@@ -562,21 +547,13 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
     nodeEnter
     .merge(node)
     .attr("transform", function(d) {
-      if (d.data.lastEvent && d.data.lastEvent.eventType === "speciation") {
         return "translate(" + [d.x, d.y] + ")";
-      }
-      else {
-        return "translate(" + [d.x + 4, d.y] + ")";
-      }
     })
     .on("click",action);  
   allNodes
     .select(".gsymbol")
     .attr("transform", function(d) {
       var str = "";
-      if (d.data.lastEvent && d.data.lastEvent.eventType === "loss") {
-        str += "rotate(45)";
-      }
       if (d.data.lastEvent && d.data.lastEvent.eventType === "leaf")  {
         str += "rotate(90)";
       } else {
@@ -601,32 +578,8 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
           case "speciation":
             return symbol.type(d3[configLayout.symbols.speciation])();
             break;
-          case "speciationOutLoss":
-            return symbol.type(d3[configLayout.symbols.speciationOutLoss])();
-            break;
-          case "branchingOut":
-            return symbol.type(d3[configLayout.symbols.branchingOut])();
-            break;
-          case "speciationOut":
-            return symbol.type(d3[configLayout.symbols.speciationOut])();
-            break;
-          case "bifurcationOut":
-            return symbol.type(d3[configLayout.symbols.bifurcationOut])();
-            break;
-          case "transferBack":
-            return symbol.type(d3[configLayout.symbols.transferBack])();
-            break;
-          case "duplication":
-            return symbol.type(d3[configLayout.symbols.duplication])();
-            break;
-          case "speciationLoss":
-            return symbol.type(d3[configLayout.symbols.speciationLoss])();
-            break;
           case "leaf":
             return symbol.type(d3.symbolTriangle)();
-            break;
-          case "loss":
-            return symbol.type(d3.symbolCross)();
             break;
           default:
             return symbol.type(d3.symbolCross)();
