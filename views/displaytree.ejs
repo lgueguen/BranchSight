@@ -545,7 +545,7 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
       var name = "";
       if (d.data.nodeinfo) {
         if (d.data.nodeinfo.status === "collapsed") {
-            name += "seq:"+d.data.nbseqspe.nbSeq + " spe:"+d.data.nbseqspe.nbSpe + " " + d.data.name ;
+            name += "("+d.data.nbseq.nbSeq + " sequences) " + d.data.name ;
         }
       }
       if (d.data.name && options.includes("name") && d.data.lastEvent.eventType === "leaf") {
@@ -1690,22 +1690,15 @@ function  addNumberSeqSpec(treeRoot) {
   treeRoot.eachAfter(function (d) {
     var specs = [];
     if (!d.children) {
-      d.data.nbseqspe =  {nbSeq : 1,nbSpe : 1};
+      d.data.nbseq =  {nbSeq : 1};
     }
     else {
       var nbseq = 0;
-      var nbspe = 0;
       var fils = d.children;
       fils.forEach(function (d){
-        nbseq = nbseq + d.data.nbseqspe.nbSeq;
-        nbspe = nbspe + d.data.nbseqspe.nbSpe;
-        var spec = getSpec(d);
-        specs = specs.concat(spec);
+        nbseq = nbseq + d.data.nbseq.nbSeq;
       })
-      var tmp = specs;
-      uspecs=removeDuplicates(tmp);
-      nbspe=uspecs.length;
-      d.data.nbseqspe =  {nbSeq :nbseq,nbSpe :nbspe};
+      d.data.nbseq =  {nbSeq :nbseq};
     }
   });
 }
