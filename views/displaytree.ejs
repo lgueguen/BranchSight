@@ -1665,16 +1665,7 @@ function phylogeny(treeRoot,offset) {
     d.x = phylodist*offset;
   });
 }
-// Fonction qui decale la position x d'un "loss"
-// ---------------------------------------------
-function phylogeny_setloss(treeRoot,offset) {
-  treeRoot.each(function (d) {
-    if (d.data.lastEvent && d.data.lastEvent.eventType === "loss") {
-     var lospar = d.parent;
-     d.x = (d.x+lospar.x)/2
-    }
-  });
-}
+
 // Fonction ajoute nb sequences et especes
 // ---------------------------------------
 function  addNumberSeqSpec(treeRoot) {
@@ -1708,33 +1699,6 @@ function expandTree(treeRoot) {
     }
   });
 }
-// Fonction recupere especes
-// -------------------------
-function getSpec (noeud) {
-  if (!noeud.children) {
-    var specs = [];
-    var eventsRec = noeud.data.eventsRec;
-    if (eventsRec) {
-      var lastEvent = eventsRec[eventsRec.length - 1];
-      specs.push(lastEvent.speciesLocation)
-    }
-    else {
-      //console.log(" ERROR : NO EVENTS FOR ");
-      //console.log(noeud.data);
-    }
-    return specs;
-  }
-  else {
-    var specs = [];
-    var fils = noeud.children;
-      fils.forEach(function (d, i){
-        var spec = getSpec(d);
-        var tmp = specs.concat(spec);
-        specs = tmp;
-      });
-    return specs;
-  }
-}
 // Fonction qui collapse les noeuds d'une certaine profondeur
 // ----------------------------------------------------------
 function expandTree(treeRoot) {
@@ -1751,77 +1715,6 @@ function expandTree(treeRoot) {
   });
 }
 
-// Fonction de suppression d'un element unique dans un tableau
-// -----------------------------------------------------------
-function removeSingle(target_array) {
-  target_array.sort();
-  var i = 0;
-  while(i < target_array.length) {
-    if(target_array[i] !== target_array[i+1]) {
-      target_array.splice(i,1);
-    }
-    else {
-      i += 1;
-    }
-  }
-  return target_array;
-}
-// Fonction de suppression des  elements multiples dans un tableau
-// ---------------------------------------------------------------
-function removeDuplicates(target_array) {
-  target_array.sort();
-  var i = 0;
-  while(i < target_array.length) {
-    if(target_array[i] === target_array[i+1]) {
-      target_array.splice(i+1,1);
-    }
-    else {
-      i += 1;
-    }
-  }
-  return target_array;
-}
-// Fonction  suppression des  elements multiples dans un tableau et classe par occurence
-// -------------------------------------------------------------------------------------
-function removesortDuplicates(target_array) {
-  target_array.sort();
-  var sorted_array = [];
-  var i = 0;
-  var j = 0;
-  var vscore  = {score: 0, fam: "none"};
-  var scored_array = [];
-  var score = [];
-  score[j] = 0;
-  sorted_array[i] = target_array[i];
-  i=1;
-  while(i < target_array.length) {
-    if(target_array[i] !==  sorted_array[j]) {
-      j = j + 1;
-      sorted_array[j] = target_array[i];
-      score[j] = 0;
-    } else {
-        score[j] = score[j] + 1;
-    }
-      i = i + 1;
-  }
-  i = 0;
-  while(i <= j){
-    vscore  = {score: score[i], fam: sorted_array[i]};
-    scored_array.push(vscore);
-    i = i + 1
-  }
-  scored_array.sort(function(a,b){
-        scA=a.score;
-        scB=b.score;
-        return scB - scA;
-      });
-  i = 0;
-  while(i <= j){
-    sorted_array[i] = scored_array[i].fam;
-    i = i + 1
-  }
-  return sorted_array;
-}
 // Actions sur les boutons
 // -----------------------
 $('#selectCrossref').on('click', function(event) {
