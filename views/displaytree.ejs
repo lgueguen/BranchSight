@@ -57,8 +57,6 @@ Modified by Grégoire ALIZADEH NOIRET, 15 March 2023
 // Recuperation des variables envoyees via Express
 // ----------------------------------------------
 var recTree = <%- arbre %>;
-var pattern = <%- pattern %>;
-pattern = '';
 var branchSite = <%- branchSite %>;
 var logBranchLength = <%- logBranchLength %>;
 
@@ -88,10 +86,6 @@ var action;                           // Action associee au clic
 var selectedCrossref;                // Reference croisée choisie (nom de la sequence)
 var selectedCrossrefURL;             // URL associe
 var crossref;                         // Objet decrivant les differentes ref croisees associees a la famille
-var spattern=pattern.split('\n');     // pattern a chercher et a afficher dans l'arbre
-// Exemple getfam?fam=CLU_005912_4_2_C&pattern=0:PETMA_GL476433.PE1+0:ANOCA_6.PE486+1:XENTR_GL172641_1.PE38+1:XENTR_GL172642_1.PE97
-pattern=spattern;
-var patterns= [];
 var div;
 var myStorage = window.localStorage;  // utilisation de localStorage pour consrever les preferences
 var displaySeqType = 'AA';      // type de sequence
@@ -194,22 +188,6 @@ else {
 // -------------------------------
 function  main_display() {
   $('#redondance').hide();
-  // Gestion des pattern (pas utile ici)
-  // Transforme le tableau de [index:sequences] en tableau de tableau de [sequences].
-  // a ameliorer, pas tres propre
-  pattern.forEach(function(d,i){
-    var buf = d.split(':');
-    if (buf.length > 1){
-      var indexPatt = buf[0];
-      if (!patterns[indexPatt]){
-        patterns[indexPatt]  = [];
-      }
-      patterns[indexPatt].push(buf[1]);
-    }
-    else {
-      // console.log("PATTERN ERROR : "+buf);
-    }
-  });
   // Test si l'arbre est du type
   // -recPhymloXML ( pas de distance, evenements de perte et transfert)
   // -phyloxml ()
@@ -476,15 +454,6 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
   }
   var nodes = treeRoot.descendants();
   var links = treeRoot.links();
-  // Coloration du pattern si il existe
-  if ((pattern != "none") && (pattern !== ' ') && (pattern !== undefined)) {
-    // Boucle sur les differents patterns
-    patterns.forEach(function (d,i) {
-      // Traite le pattern d avec comme index i
-      // var subNodes = subnode(nodes,d,i);
-      scrollref = subnode(nodes,d,i);
-    });
-  }  
   // Dimensions du svg
   var minX = d3.min(nodes, function(d) {
     return d.x;
@@ -520,57 +489,8 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
     .merge(link)  // fusionne les nouveaux elements avec les anciens
     .attr("fill","none")
     .attr("stroke-width",configLayout.linkStrokeSize)
-    .attr("stroke",function (d) {
-      if (d.target.data.lastEvent !== undefined) {
-        var pa = d.target.data.lastEvent.pattern;
-        if (pa !== undefined) {
-          return "red";
-        }
-      }
-      if (d.target.data.deadSpecies)
-        {
-          return "#ffffff";
-        }
-      else {
-        return "#0e2e2e";
-      }
-    })
-    .on('mouseover',function (d) {
-      var pattIndex =  d.target.data.lastEvent.pattern;
-      if (pattIndex !== undefined) {
-        var sel1 = g.selectAll(".link").filter(function(e) {
-          var pa = e.target.data.lastEvent.pattern;
-          if (pa !== undefined) {
-            // pa est le tableau des index des pattern  associee au noeud
-            // pattIndex[0] est l'index de la pattern  associee au noeud survole
-            return (pa.indexOf(pattIndex[0]) > -1)
-          }
-          return (false)
-        });
-      }
-    })
-    .on('mouseout',function (d){
-      var pattIndex =  d.target.data.lastEvent.pattern;
-      if (pattIndex !== undefined) {
-        var sel1 = g.selectAll(".link").filter(function(e) {
-          var pa = e.target.data.lastEvent.pattern;
-          if (pa !== undefined) {
-            // pa est le tableau des index des pattern  associee au noeud
-            // pattIndex[0] est l'index de la pattern  associee au noeud survole
-            return (pa.indexOf(pattIndex[0]) > -1)
-          }
-          return (false)
-        });
-        sel1.style("stroke-width",configLayout.linkStrokeSize)
-      }
-    })
-    .attr("d", diagonal)
-    .attr('stroke-dasharray',function(d){
-      var et = d.target.data.lastEvent.eventType;
-      // var sl = d.target.data.lastEvent.speciesLocation;
-      // if (et === "transferBack" || et === "bifurcationOut" || sl == "Out") return '5,5';
-      if (et === "transferBack" || et === "bifurcationOut") return '5,5';
-    });  
+    .attr("stroke","#0e2e2e")
+    .attr("d", diagonal);
   // D3:  Objets NODE
   var node = g.selectAll(".node").data(nodes);
   node.exit().remove();
@@ -748,27 +668,13 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
         else {
           name += (d.data.name || d.data.lastEvent.geneName);
         }
-        if (d.data.lastEvent && d.data.lastEvent.pattern !==undefined) {
-          name = ">>>>"+name+"<<<<";
-        }
       }
       return name;
     })
     .style("fill",function (d) {
     })
     .style("font-family","sans-serif")
-    .style("font-size",12+"px")
-    .style("text-decoration",function (d) {
-      if (d.data.lastEvent) {
-        var pa = d.data.lastEvent.pattern;
-      } else {
-        var pa = undefined;
-      }
-      if (pa != undefined) {
-        return "wavy underline overline";
-      }
-      else return "none";
-    });
+    .style("font-size",12+"px");
   allNodes
     .select(".internal")
     .transition()
@@ -1840,71 +1746,7 @@ function recuAncestors (todo, done) {
     return (done, [])
   }
 }
-// Fonction de coloration du resultat d'une recherche de  pattern
-// La variable pattern est ici un tableau du nom des feuilles qui ont matchés
-// --------------------------------------------------------------------------
-function subnode(nodes, pattern, colPattern) {
-  var ancs;
-  var n1;
-  var n2;
-  var n3;
-  var selection = [];
-  var racine = null;
-  // Selection des feuilles
-  var scrollref = 0;
-  nodes.forEach(function (d, i){
-    if (d.depth == 0) {
-      racine = d;
-    }
-    if (d.data.lastEvent && d.data.lastEvent.crossref) {
-      // Si la balise crossref est presente on
-      // l'utilise plutot que le nom du gene
-      var cross=d.data.lastEvent.crossref;
-      for(var exKey in cross) {
-        var nomFeuille = cross[exKey];
-        pattern.forEach(function (p){
-          var nomPattern = p.replace(/[\n\r]/g, '');
-          if (nomFeuille === nomPattern) {
-            selection.push(d);
-            scrollref=d.y;
-          }
-        })
-      }
-    }
-    if (d.data.name){
-      var nomFeuille = d.data.name;
-      pattern.forEach(function (p){
-        var nomPattern = p.replace(/[\n\r]/g, '');
-        if (nomFeuille === nomPattern) {
-          selection.push(d);
-          scrollref=d.y;
-          if (!d.data.lastEvent["pattern"]) {
-            d.data.lastEvent["pattern"] = [];
-            }
-            d.data.lastEvent["pattern"].push(colPattern); // un noeud peut etre associe a plusieur palettes
-        }
-      })
-    }
-    var tmp =   removeDuplicates(selection);
-    selection = tmp;
-  });
-  var processed = [];
-  if (selection.length == 1) {
-    selection.push(racine);
-  }
-  var toprocess = selection;
-  recuAncestors(toprocess,processed);
-  var ancestors = processed;
-  nodes.forEach(function (d ){
-    if (ancestors.includes(d)) {
-      if (!d.data.lastEvent["pattern"]) {
-        d.data.lastEvent["pattern"] = [];
-      }
-      d.data.lastEvent["pattern"].push(colPattern); // un noeud peut etre associe a plusieur palettes
-    }
-  });
-  return scrollref;
-}
+
 // Fonction de calcul de la position  d'un noeud a partir des longueurs
 // de branch_length
 // --------------------------------------------------------------------
@@ -2033,90 +1875,7 @@ function expandTree(treeRoot) {
     }
   });
 }
-// Fonction qui collapse les noeuds d'une certaine profondeur
-// ----------------------------------------------------------
-function collapseVeryBigTree(treeRoot,patterns) {
-  var acollapser = [];
-  var aouvrir = [];
-  if (patterns.length > 0)  {
-    //Ecrase tous les noeuds
-    treeRoot.each(function (d) {
-      if ((d.depth == 5) || (d.depth == 10) ||(d.depth == 20)|| (d.depth == 30)|| (d.depth == 40) ) {
-      acollapser.push(d)
-      }
-    });
-    // Boucle sur les patterns
-    patterns.forEach(function(p) {
-      // Selection des feuilles de la pattern
-      p.forEach(function(d,i) {
-        var nomPattern= d.replace(/[\n\r]/g, '');
-        var focusNode = null;
-        // Recupere la feuille focus
-        treeRoot.each(function (d,i ){
-          if (d.data.name){
-            var nomFeuille = d.data.name;
-            focusNode = d;
-          }
-          // cas des crossref
-          if (d.data.eventsRec) {
-            if (d.data.eventsRec[0].crossref) {
-              // Si la balise crossref est presente on
-              // l'utilise plutot que le nom du gene
-              var cross=d.data.eventsRec[0].crossref;
-              for(var exKey in cross) {
-                var nomFeuille = cross[exKey];
-                if (nomFeuille === nomPattern){
-                  //console.log("FIND PATTERN "+nomFeuille);
-                  focusNode = d;
-                }
-              }
-            }
-          }
-        });
-        if (focusNode) {
-          var parent = focusNode.parent;
-          //Ouvre les freres de la feuille
-          parent.each(function (d) {
-            // aouvrir.push(d)
-          });
-          //ouvre les noeuds entre la feuille et la racine
-          while (parent != null) {
-            aouvrir.push(parent)
-            parent = parent.parent;
-          }
-        }
-        else {
-          //console.log("PATTERN NOT FOUND : "+nomPattern);
-        }
-      });
-    });
-  }
-  else {
-    //console.log("NO PATTERN")
-    treeRoot.each(function (d) {
-      if ((d.depth == 5) || (d.depth == 10) ||(d.depth == 30)|| (d.depth == 60)|| (d.depth == 90) ) {
-        acollapser.push(d)
-      }
-    });
-  }
-  acollapser.forEach(function (d) {
-    //console.log('collapseVeryBigTree: acollapser');
-    if (d.data.clade) {
-      // if (collapseMode == 'collapseOn') {
-      d.data._clade = d.data.clade;
-      d.data.clade = null;
-      d.data.nodeinfo = {status : "collapsed"};
-      // }
-    }
-  });
-  aouvrir.forEach(function (d) {
-    if (d.data._clade) {
-      d.data.clade = d.data._clade;
-      d.data._clade = null;
-      d.data.nodeinfo = {status : "extended"};
-    }
-  });
-}
+
 // Fonction de suppression d'un element unique dans un tableau
 // -----------------------------------------------------------
 function removeSingle(target_array) {
@@ -2282,13 +2041,6 @@ $('#action').on('click', function(event, dropdownData) {
 if (target.text != undefined) {
   updateLayout(cladeRoot,0,0);
 }
-});
-$('#globalcollapse').on('click', function(event, dropdownData) {
-  treeRoot = d3.hierarchy(cladeRoot, function(d) {
-    return d.clade;
-  });
-  collapseVeryBigTree(treeRoot,patterns);
-  updateLayout(cladeRoot);
 });
 $('#globalexpand').on('click', function(event, dropdownData) {
   treeRoot = d3.hierarchy(cladeRoot, function(d) {
