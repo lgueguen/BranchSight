@@ -22,12 +22,12 @@ Modified by Grégoire ALIZADEH NOIRET, 15 March 2023
     </nav>
   </header>
   <main>    
-    <div style="z-index:0; position: fixed; top: 30;width: 100%;"> <!-- debut -->
+    <div style="z-index:0; position: fixed; top: 30;width: 100%; height: 5"> <!-- debut -->
       <div id="navigator-container" style="border:0px solid lightgrey; background-color:white; left:30%; position:relative; overflow-y: hidden; width: 70%;">
         <svg id="svg0"></svg>
       </div>
       <div>
-        <div id="bidon" style="border:0px solid lightgrey; float: left; overflow-y: auto; width: 30%;">
+        <div id="bidon" style="z-index:-10; border:0px solid lightgrey; float: left; overflow-y: auto; width: 30%;">
           <svg id="svgbidon"></svg>
         </div>
         <div id="selpos" style="background-color:white; border:0px solid lightgrey; overflow-x: auto; overflow-y: auto;">
@@ -36,7 +36,7 @@ Modified by Grégoire ALIZADEH NOIRET, 15 March 2023
       </div>
 
     </div> <!--  fin-->
-      <div id="tree-container" style="z-index:-10;position:relative;top:300px;border:0px solid lightgrey; float: left; overflow-y: auto; width: 30%;">
+      <div id="tree-container" style="z-index:+5;position:relative;top:300px;border:0px solid lightgrey; float: left; overflow-y: auto; width: 30%;">
         <svg id="svg1"></svg>
       </div>
       <div id="alignment-container" style="z-index:-10;position:relative;top:300px;border:0px solid lightgrey; overflow-x: auto; overflow-y: auto;">
