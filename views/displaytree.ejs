@@ -64,31 +64,31 @@ var logBranchLength = <%- logBranchLength %>;
 // ------------------
 var treeRoot;
 var cladeRoot;
-var layout = d3.layout.cladogram();  // Fonction  D3 qui transforme les donnees en cladograme
-var nodeWidth = 80;                  // Largeur de l'arbre
-var nodeHeight = 20;                 // Hauteur de l'arbre
-var hLetter = 15;                    // Hauteur des blocs de couleurs
-var hUnderline = 15;                 // Position du soulignage
-var fitNormalPoliceSize = 15;        // Taille de la police des aa et dna en mode normal
-var fitSmallPoliceSize = 8;          // Taille de la police des aa et dna en mode reduit
+var layout = d3.layout.cladogram();   // Fonction  D3 qui transforme les donnees en cladograme
+var nodeWidth = 80;                   // Largeur de l'arbre
+var nodeHeight = 20;                  // Hauteur de l'arbre
+var hLetter = 15;                     // Hauteur des blocs de couleurs
+var hUnderline = 15;                  // Position du soulignage
+var fitNormalPoliceSize = 15;         // Taille de la police des aa et dna en mode normal
+var fitSmallPoliceSize = 8;           // Taille de la police des aa et dna en mode reduit
 var fitPoliceSize = fitNormalPoliceSize;  // Taille de la police des aa et dna 
 var stringWidth;                      // Largeur affichage arbrevar svg;                              // La div SVG
 var g;                                // Conteneur principal
 var diagonal = svgLinks.shoulder;     // cf links.js
 var symbol = d3.symbol().size(128);   // Symbol des noeuds
 var color = d3.scaleOrdinal(d3.schemeCategory20); // Echelle des couleurs
-var options;                         // Options d'affichage
+var options;                          // Options d'affichage
 var action;                           // Action associee au clic
-var selectedCrossref;                // Reference croisée choisie (nom de la sequence)
-var selectedCrossrefURL;             // URL associe
+var selectedCrossref;                 // Reference croisée choisie (nom de la sequence)
+var selectedCrossrefURL;              // URL associe
 var crossref;                         // Objet decrivant les differentes ref croisees associees a la famille
 var div;
 var myStorage = window.localStorage;  // utilisation de localStorage pour consrever les preferences
-var displaySeqType = 'AA';      // type de sequence
-var hStepNormal = 12;           // Epaisseur du carré de couleur en mode normal
-var hStepSmall = 6;             // Epaisseur du carré de couleur en mode reduit
-var hStepBase = hStepNormal;    // Epaisseur du carré de base
-var hStep;                      // Epaisseur du carré ( different si aa ou dna)
+var displaySeqType = 'AA';            // type de sequence
+var hStepNormal = 12;                 // Epaisseur du carré de couleur en mode normal
+var hStepSmall = 6;                   // Epaisseur du carré de couleur en mode reduit
+var hStepBase = hStepNormal;          // Epaisseur du carré de base
+var hStep;                            // Epaisseur du carré ( different si aa ou dna)
 var alignmentLetterNormalSpacing = hStepBase - 10;
 var alignmentLetterSmallSpacing = 0; 
 var alignmentLetterSpacing =  alignmentLetterNormalSpacing;
@@ -102,7 +102,6 @@ var psThresholdMaxDownBgColor = "#0000FF";
 var psThresholdMinDownBgColor = "#00FFFF";
 var psNormalThresholdBgColor = "#DDDDDD";
 var psMissingBgColor = "#faf0e6";
-
 var seq_lg = xmlparser.flatTree(recTree.phyloxml.phylogeny.maxSeqIdLength)*10;
 var isDNA = (xmlparser.flatTree(recTree.phyloxml.phylogeny.size.isDNA)=="true");
 var isCodon = (xmlparser.flatTree(recTree.phyloxml.phylogeny.size.isCodon)=="true");
@@ -120,19 +119,18 @@ var globalI = 0;
 var leftBoundary = 0;
 var rightBoundary = 1;
 var firstLoad = 1;
-var blackWhite = false; // Light grey -> dark grey instead of grey -> light red -> dark red
+var blackWhite = false;           // Light grey -> dark grey instead of grey -> light red -> dark red
 var automaticBoundaries = true;
 var siteOffset = 0;
 var nbBranches = 0;
 var nbLeaves = 0;
 var nbSites = 0;
 var upperThresholdMode = true;
-var modStepX = 150; // Pas de la variation en largeur
-var modStepY = 5;   // Pas de la variation en hauteur
+var modStepX = 150;               // Pas de la variation en largeur
+var modStepY = 5;                 // Pas de la variation en hauteur
 var stats_type  = "proportion";
 
 // Dico des aa ( a ameliorer)
-// ==========================
 var hslaa = new Object();
 
 hslaa["K"]= [8,80,50];
@@ -180,8 +178,9 @@ if (!isStorageSupported(myStorage)) {
 else {
   main_display();
 }
+
 // Fonction d'affichage principale
-// -------------------------------
+// ===============================
 function  main_display() {
   $('#redondance').hide();
     cladeRoot = recTree.phyloxml.phylogeny.clade;
@@ -210,7 +209,6 @@ function  main_display() {
   action = svgEvents.showBranchResults;
   var stringAction = "View Branch Results";
   myStorage.setItem("action",stringAction);
-  console.log("DEBUG STORED ACTION "+action)
   stringWidth = myStorage.getItem("width");
   if ((stringWidth === null )||(stringWidth === undefined)||(stringWidth === "undefined")){
     stringWidth = nodeWidth;
@@ -232,14 +230,14 @@ function  main_display() {
 }
 
 // Fonction de mise a jour de l'affichage
-// ---------------------------------------
+// ======================================
 function updateLayout(cRoot,firstLoad=0,scrolling=1) {
   var treeRoot = d3.hierarchy(cRoot, function(d) {
     return d.clade;
   });
   treeRoot.each(function (d) {
     var eventsRec = d.data.eventsRec;
-    // Test si on a un noeud enrichi avec l'info eventsRec (type RecPhyloXML) ou non (type phyloxml)
+    // Test si on a un noeud enrichi avec l'info eventsRec
     if (eventsRec){
       d.data.lastEvent = eventsRec[eventsRec.length - 1];
     }
@@ -247,7 +245,7 @@ function updateLayout(cRoot,firstLoad=0,scrolling=1) {
       // Lors de la premiere lecture de l'arbre phyloxml, il n'y a pas de data.lastEvent defini aux noeuds
       // (Sauf les noeuds ecrases par la monophylie)
       // Mais ensuite ils sont definis : on choisit "speciation" meme si il ne s'agit pas d'une speciation en
-      // realité, mais cela permet d'utiliser les code graphiques de speciation. eventType peut etre "speciation".
+      // realité, mais cela permet d'utiliser les codes graphiques de speciation. eventType peut etre "speciation".
       // Par contre il ne doit plus etre   "collapsed" car c'est lie a la representation dans le DOM. Utiliser nodeinfo.status
       if (d.children) {
         if (!d.data.lastEvent) {
