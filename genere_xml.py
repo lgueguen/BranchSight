@@ -556,7 +556,7 @@ def createPhyloXML(fam,alignmentDict,newick,results):
 
     #### percentiles
     
-    lperc = {str(x):"{:7.4}".format(percentile(allres,x)) for x in [0.01,0.05,0.95,0.99]}
+    lperc = {str(x):"{:7.4}".format(float(percentile(allres,x))) for x in [0.01,0.05,0.95,0.99]}
 
     percentiles = etree.Element("Percentiles")
     for perc, vperc in lperc.items():
