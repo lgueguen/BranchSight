@@ -222,14 +222,16 @@ def loadResultsBranchSite(resultsFile):
             try:
               siteList.append(int(lp[0])-deb1)
               for i in range(nbcol):
-                col_lists[i].append(float(line[i+1]))
+                f = float(line[i+1])
+                col_lists[i].append(0 if isnan(f) else f) 
             except ValueError:
               raise OSError(f"Conversion failed in line {line}")
         else:
           siteList.append(len(siteList))
           try:
             for i in range(nbcol):
-              col_lists[i].append(float(line[i]))
+                f = float(line[i])
+                col_lists[i].append(0 if isnan(f) else f) 
           except ValueError:
             raise OSError(f"Conversion failed in line {line}")
     d_cols = {}
