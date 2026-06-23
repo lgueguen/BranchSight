@@ -1742,6 +1742,7 @@ $('#action').ready(function() {
 
 
 $('#stats').on('click', function(event, dropdownData) {
+  event.preventDefault();
   var target = event.toElement || event.relatedTarget || event.target || function () { throw "Failed to attach an event target!"; }
   myStorage.setItem("stats",target.text);
   //console.log("DEBUG STATS "+target.text);
@@ -1761,16 +1762,16 @@ $('#stats').on('click', function(event, dropdownData) {
       break;
     default:
   }
-//console.log("DEBUG STATS "+stats_type);
 if (target.text != undefined) {
-  updateLayout(cladeRoot,0,0);
+  // updateLayout(cladeRoot,0,0);
+  updateNodeColors();
 }
 });
 
 $('#action').on('click', function(event, dropdownData) {
+  event.preventDefault();
   var target = event.toElement || event.relatedTarget || event.target || function () { throw "Failed to attach an event target!"; }
   myStorage.setItem("action",target.text);
-  //console.log("DEBUG ACTION "+target.text);
   $('#button_action').text(target.text);
   switch (target.text) {
     case "View Branch Results":
@@ -1803,9 +1804,9 @@ $('#action').on('click', function(event, dropdownData) {
       break;
     default:
   }
-//console.log("DEBUG "+action);
 if (target.text != undefined) {
-  updateLayout(cladeRoot,0,0);
+  var node_to_change = g.selectAll(".node");
+  node_to_change.on("click", action);
 }
 });
 $('#globalexpand').on('click', function(event, dropdownData) {
