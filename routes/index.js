@@ -184,13 +184,12 @@ router.post("/upload_files", upload.fields([
     });
   });
 });
-
+ 
 // GET display_example
 // -------------------
-router.get('/display_example', function(req, res) {
+router.get('/display_example/', function(req, res) {
   // Read XML tree as JSON and display data
-
-  const fname = 'examples/Ubr7.xml';
+  const fname = 'examples/'+req.query.filepath;
 
   fs.readFile(fname, 'utf8' , (err, data) => {
     if (err) {
