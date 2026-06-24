@@ -430,8 +430,11 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
             showTooltip();
             // Display a tooltip when hovering the cursor over a node
             if (d.data.branch_info) {
-              // writeTooltip(getPositiveRateJSON(d.data.branch_info.results, leftBoundary, rightBoundary).toFixed(3));
-              writeTooltip(getPositiveStatsJSON(stats_type,d.data.branch_info.results, leftBoundary, rightBoundary).toFixed(3));
+              if (mode_site) {
+                  writeTooltip(getValueJSON(d.data.branch_info.results, selected_site).toFixed(3));
+              } else {
+                  writeTooltip(getPositiveStatsJSON(stats_type,d.data.branch_info.results, leftBoundary, rightBoundary).toFixed(3));
+              }    
             } else {
               writeTooltip('');
             }
@@ -1412,9 +1415,6 @@ function updateNodeColorsOnClick(x) {
       if (d.data.branch_info) {
         var positiveRate = getValueJSON(d.data.branch_info.results, x).toFixed(3);
         //console.log("debug positive "+positiveRate)
-        if (positiveRate < 0) {
-          //console.log("debug no data "+d.data.branch_info.results);
-        } 
         return colorByRate(positiveRate);
       }
       else {
@@ -1422,7 +1422,7 @@ function updateNodeColorsOnClick(x) {
       }
     });
 
-  // The color of a branch depends on the number of positive sites in its node
+  // The color of a branch depends on the value in its node
   g.selectAll('path.link')
     .style('stroke', function(d) {
       if (d.target.data.branch_info) {
