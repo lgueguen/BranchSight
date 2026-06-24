@@ -17,10 +17,13 @@ def SubsCost(a,b, mat = {}):
   """Costs for substitutions. Indels cost likewise.
 
   """
-  if a=="*" or b=="*":
+  if a=="?" or b=="?":
     return 1
   if a!=b:
-    return 1
+    if len(a)==1:
+      return 1
+    else:
+      return sum(c1 == c2 for c1,c2 in zip(a,b))
   else:
     return 0
 
@@ -124,8 +127,8 @@ class ASR_Node(Node):
         for st in child.states(pos):
           if not st in herecost:
             herecost[st] = 0
-      if not "*" in herecost:
-        herecost["*"] = 0
+      if not "?" in herecost:
+        herecost["?"] = 0
       
         
       for child in self.get_children():
@@ -170,8 +173,8 @@ class ASR_Node(Node):
           for st in upcost[pos]:
             if not st in upcostchildpos:
               upcostchildpos[st] = 0
-        if not "*" in upcostchildpos:
-          upcostchildpos["*"]=0
+        if not "?" in upcostchildpos:
+          upcostchildpos["?"]=0
         
         ## then add/min
         for other in self.get_children(): # neighbours
@@ -208,10 +211,10 @@ class ASR_Node(Node):
           if k in self.__costs[pos]:
             self.__costs[pos][k]+=v
           else:
-            self.__costs[pos][k]=v+self.__costs[pos]["*"]
+            self.__costs[pos][k]=v+self.__costs[pos]["?"]
         for k in self.__costs[pos]:
           if not k in upcost[pos]:
-            self.__costs[pos][k]+=upcost[pos]["*"]        
+            self.__costs[pos][k]+=upcost[pos]["?"]        
 
 if __name__ == "__main__":
   parser = argparse.ArgumentParser()
