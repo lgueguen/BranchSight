@@ -108,7 +108,7 @@ def test_is_coding(alignmentDict:dict):
   nstop = 0
   for k,nuc_seq in alignmentDict.items():
     laa = []
-    codons = [nuc_seq[i:i+3].upper() for i in range(0, len(nuc_seq), 3)]
+    codons = [nuc_seq[i:i+3] for i in range(0, len(nuc_seq), 3)]
     for codon in codons:
       if codon == "---":
           continue        
@@ -128,13 +128,13 @@ def test_is_coding(alignmentDict:dict):
 def test_is_nucl(alignmentDict):
   for seq in alignmentDict.values():
     for nuc in seq:
-      if not nuc.upper() in "ACGTN-X!*":
+      if not nuc in "ACGTN-X!*":
         return false
   return true
       
   
 def loadAlignment(alignmentFile, sites = []):
-    '''Loads a FASTA alignment with sites (starting at position 0)
+    '''Loads a FASTA alignment with list of sites (starting at position 1)
     Output: (dictionary of lists of states)
     '''
 
@@ -161,11 +161,11 @@ def loadAlignment(alignmentFile, sites = []):
     if sites==[]:
       isCodon = test_is_coding(alignmentDict)
       if isCodon:
-        sites= list(range(int(lenseq/3)))
+        sites= list(range(1,int(lenseq/3)+1))
       else:
-        sites= list(range(lenseq))
+        sites= list(range(1,lenseq+1))
     else:
-      Msites = max(sites)+1
+      Msites = max(sites)
       if Msites == lenseq/3:
         isCodon=True # Unsafe:perhaps to few sites to detect non-coding sequence
       elif Msites!=lenseq:
@@ -176,10 +176,10 @@ def loadAlignment(alignmentFile, sites = []):
     alignmentDict2 = {}
     if not isCodon:
       for name, seq in alignmentDict.items():
-        alignmentDict2[name]=[seq[x] for x in sites]
+        alignmentDict2[name]=[seq[x-1] for x in sites]
     else:
       for name, seq in alignmentDict.items():
-        alignmentDict2[name]= ["".join([seq[3*x],seq[3*x+1],seq[3*x+2]]) for x in sites]
+        alignmentDict2[name]= ["".join([seq[3*x-3],seq[3*x-2],seq[3*x-1]]) for x in sites]
 
     return alignmentDict2
 
@@ -196,7 +196,7 @@ def percentile(lvalue, perc):
 
 def loadResultsBranchSite(resultsFile):
     '''Loads branch-site results.
-    Returns dict of lists of results, list of sites (starting with 0, when sites in file start with 1)
+    Returns dict of lists of results, list of sites (starting with 1, when sites in file start with 1)
     '''
 
     col_lists = []
@@ -220,14 +220,14 @@ def loadResultsBranchSite(resultsFile):
             if deb1==None:
               deb1 = (int(lp[0]))
             try:
-              siteList.append(int(lp[0])-deb1)
+              siteList.append(int(lp[0])-deb1+1)
               for i in range(nbcol):
                 f = float(line[i+1])
                 col_lists[i].append(0 if isnan(f) else f) 
             except ValueError:
               raise OSError(f"Conversion failed in line {line}")
         else:
-          siteList.append(len(siteList))
+          siteList.append(len(siteList)+1)
           try:
             for i in range(nbcol):
                 f = float(line[i])
