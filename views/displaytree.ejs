@@ -792,7 +792,14 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
         //console.log("click " + index + "=>"+d);
         mode_site = true;
         selected_site = d;
-        console.log("MODE_SITE " + mode_site +" "+ selected_site);
+        svgmarker.select("#marker").remove();
+        svgmarker.append('rect')
+        .attr('id', "marker")
+        .attr('width', 5)
+        .attr('height', 100)
+        .attr("x", x(d -siteOffset))
+        .attr('y', 100)
+        .style('fill', "pink");
         writeTooltip(d);
         showTooltip();
         updateNodeColorsOnClick(d);
@@ -843,7 +850,14 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
         //console.log("click " + index + "=>"+d);
         mode_site = true;
         selected_site = d;
-        console.log("MODE_SITE " + mode_site +" "+ selected_site);
+        svgmarker.select("#marker").remove();
+        svgmarker.append('rect')
+        .attr('id', "marker")
+        .attr('width', 5)
+        .attr('height', 100)
+        .attr("x", x(d -siteOffset))
+        .attr('y', 100)
+        .style('fill', "pink");
         writeTooltip(d);
         showTooltip();
         updateNodeColorsOnClick(d);
@@ -873,6 +887,20 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
     .style('stroke-width', '1')
     .style('stroke-dasharray', ('4, 4'));
   psGraph.append('br');
+
+  // === Ajout du graphe des résultats au SVG ===
+  var svgmarker = svg3.append('g')
+    .attr('id', 'svgmarker')
+    .attr('transform', 'translate('+(50 + seq_lg)+', '+psGraphMargins.top+')');
+  
+  // svgmarker.append('rect')
+  //     .attr('id', "marker")
+  //     .attr('width', 5)
+  //     .attr('height', 100)
+  //     .attr('x', 100)
+  //     .attr('y', 100)
+  //     .style('fill', "pink");
+
   console.log("graphes OK");
   // ====================================================
   // | Fin : graphe des résultats de sélection positive |
