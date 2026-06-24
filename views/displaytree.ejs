@@ -129,6 +129,8 @@ var upperThresholdMode = true;
 var modStepX = 150;               // Pas de la variation en largeur
 var modStepY = 5;                 // Pas de la variation en hauteur
 var stats_type  = "proportion";
+var mode_site = false;  //false : mode fenetre, true : mode site
+var selected_site = 0;
 
 // Dico des aa ( a ameliorer)
 var hslaa = new Object();
@@ -656,6 +658,8 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
   document.getElementById(compactWindow.attr('id')).onmousedown = function(e) {
     scrollAlignment(e);
     compactWindow.on('mousemove', function (e) {
+      mode_site = false;
+      console.log("MODE_SITE " + mode_site);
       scrollAlignment(e);
     });
     compactWindow.on('mouseup', function (e) {
@@ -786,6 +790,9 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
       .on('mouseout', hideTooltip)
       .on('click', function(index,d) {
         //console.log("click " + index + "=>"+d);
+        mode_site = true;
+        selected_site = d;
+        console.log("MODE_SITE " + mode_site +" "+ selected_site);
         writeTooltip(d);
         showTooltip();
         updateNodeColorsOnClick(d);
@@ -834,6 +841,9 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
       .on('mouseout', hideTooltip)
       .on('click', function(index,d) {
         //console.log("click " + index + "=>"+d);
+        mode_site = true;
+        selected_site = d;
+        console.log("MODE_SITE " + mode_site +" "+ selected_site);
         writeTooltip(d);
         showTooltip();
         updateNodeColorsOnClick(d);
@@ -1764,7 +1774,12 @@ $('#stats').on('click', function(event, dropdownData) {
   }
 if (target.text != undefined) {
   // updateLayout(cladeRoot,0,0);
-  updateNodeColors();
+  if (mode_site) {
+    updateNodeColorsOnClick(selected_site);
+  }
+  else {
+    updateNodeColors();
+  }
 }
 });
 
