@@ -119,7 +119,6 @@ var globalI = 0;
 var leftBoundary = 0;
 var rightBoundary = 1;
 var firstLoad = 1;
-var blackWhite = false;           // Light grey -> dark grey instead of grey -> light red -> dark red
 var automaticBoundaries = true;
 var siteOffset = 0;
 var nbBranches = 0;
@@ -843,25 +842,47 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
 
 
   // Ajout du seuil supérieur au graphe
-  psGraph.append('line')
-    .attr('x1', x(1))
-    .attr('y1', y(psThresholdMaxUp))
-    .attr('x2', x(resultsJSON.length+1))
-    .attr('y2', y(psThresholdMaxUp))
-    .style('stroke', '#000000')
-    // .style('stroke', psThresholdMaxUpBgColor)
-    .style('stroke-width', '2')
-    .style('stroke-dasharray', ('4, 4'));
-  // Ajout du seuil inférieur au graphe
-  psGraph.append('line')
-    .attr('x1', x(1))
-    .attr('y1', y(psThresholdMinUp))
-    .attr('x2', x(resultsJSON.length+1))
-    .attr('y2', y(psThresholdMinUp))
-    .style('stroke', '#000000')
-    // .style('stroke', psThresholdMinUpBgColor)
-    .style('stroke-width', '1')
-    .style('stroke-dasharray', ('4, 4'));
+  if (upperThresholdMode){
+    psGraph.append('line')
+      .attr('x1', x(1))
+      .attr('y1', y(psThresholdMaxUp))
+      .attr('x2', x(resultsJSON.length+1))
+      .attr('y2', y(psThresholdMaxUp))
+      .style('stroke', '#000000')
+      // .style('stroke', psThresholdMaxUpBgColor)
+      .style('stroke-width', '2')
+      .style('stroke-dasharray', ('4, 4'));
+    // Ajout du seuil inférieur au graphe
+    psGraph.append('line')
+      .attr('x1', x(1))
+      .attr('y1', y(psThresholdMinUp))
+      .attr('x2', x(resultsJSON.length+1))
+      .attr('y2', y(psThresholdMinUp))
+      .style('stroke', '#000000')
+      // .style('stroke', psThresholdMinUpBgColor)
+      .style('stroke-width', '1')
+      .style('stroke-dasharray', ('4, 4'));
+  } else {
+    psGraph.append('line')
+      .attr('x1', x(1))
+      .attr('y1', y(psThresholdMaxDown))
+      .attr('x2', x(resultsJSON.length+1))
+      .attr('y2', y(psThresholdMaxDown))
+      .style('stroke', '#000000')
+      // .style('stroke', psThresholdMaxDownBgColor)
+      .style('stroke-width', '2')
+      .style('stroke-dasharray', ('4, 4'));
+    // Ajout du seuil inférieur au graphe
+    psGraph.append('line')
+      .attr('x1', x(1))
+      .attr('y1', y(psThresholdMinDown))
+      .attr('x2', x(resultsJSON.length+1))
+      .attr('y2', y(psThresholdMinDown))
+      .style('stroke', '#000000')
+      // .style('stroke', psThresholdMinDownBgColor)
+      .style('stroke-width', '1')
+      .style('stroke-dasharray', ('4, 4'));
+  }
   psGraph.append('br');
   console.log("graphes OK");
   // ====================================================
@@ -1242,10 +1263,8 @@ function getColorFromResult(res) {
       return psThresholdMaxUpBgColor;
     } else if (res >= psThresholdMinUp) {
       return psThresholdMinUpBgColor;
-    } else if (res != 0) {
-      return psNormalThresholdBgColor;
     } else {
-      return psMissingBgColor;
+      return psNormalThresholdBgColor;
     }
   } else {
     if (res <= psThresholdMaxDown) {
@@ -1253,14 +1272,10 @@ function getColorFromResult(res) {
     } else if (res <= psThresholdMinDown) {
         return psThresholdMinDownBgColor;
     } else {
-        if (res != 0) {
-          return psNormalThresholdBgColor;
-        } else {
-          return psMissingBgColor;
-        }
-    }
+        return psNormalThresholdBgColor;
+    } 
   }
-  }
+}
   
 // Renvoie l'opacite associee au taux
 // ----------------------------------
@@ -1270,25 +1285,20 @@ function getOpacFromResult(res) {
       return 1.0;
     } else if (res >= psThresholdMinUp) {
       return 0.5;
-    } else if (res >= 0) {
-      return 0.0;
     } else {
       return 0.0;
     }
   } else {
-    if (res >= 0) {
-      if (res <= psThresholdMaxDown) {
-        return 1.0;
-      } else if (res <= psThresholdMinDown) {
-        return 0.5;
-      } else {
-        return 0.0;
-      }
+    if (res <= psThresholdMaxDown) {
+      return 1.0;
+    } else if (res <= psThresholdMinDown) {
+      return 0.5;
     } else {
       return 0.0;
     }
   }
 }
+  
 // Fonction de calcul de la statistique maximale dans les résultats
 // ----------------------------------------------------------------
 function maxStatJSON(jsonResultsList) {
@@ -1299,7 +1309,8 @@ function maxStatJSON(jsonResultsList) {
       }
     });
     return currentmax;
-  }
+    }
+    
 // Fonction de calcul de la statistique minimale dans les résultats
 // ----------------------------------------------------------------
 function minStatJSON(jsonResultsList) {
@@ -1310,19 +1321,17 @@ function minStatJSON(jsonResultsList) {
       }
     });
     return currentmin;
-  }
+    }
+    
 // Couleur des noeuds et branches de l'arbre selon le taux
 // -------------------------------------------------------
 function colorByRate(rate) {
-  if (blackWhite) {
-    return 'hsl(0, 0%, '+(80-2*rate*100)+'%)';
-  } else {
     if (upperThresholdMode) {
-        return 'hsl(0, 100%, '+(85 * (1 - rate)^2)+'%)';
+        return 'hsl(0, 100%, '+ (85 * (1 - rate)^2)+'%)';
     } else {
-        return 'hsl(250, 100%, '+(85 * (1 - rate)^2)+'%)';
+        return 'hsl(250, 100%, '+ Math.min(85,(85 * (1 - rate)^2)) +'%)';
+//        return 'hsl(250, 100%, '+ (85 * (1 - rate)^2) +'%)';
     }
- }
 }
  
 // Mise a jour de la couleur des noeuds
@@ -1345,22 +1354,22 @@ g.selectAll('path.symbol')
     }
   });
 
-  // The color of a node depends on the number of positive sites
-  g.selectAll('path.symbol')
+// The color of a node depends on the number of positive sites
+g.selectAll('path.symbol')
     .style('fill', function(d) {
       if (d.data.branch_info) {       
 //        console.log("DATA ")
 //        console.log(d.data)
-          var positiveRate = d.data.positiveRate;
-        return colorByRate(positiveRate);
+          var rate = d.data.positiveRate;
+        return colorByRate(rate);
       }
     });
   // The color of a branch depends on the number of positive sites in its node
   g.selectAll('path.link')
     .style('stroke', function(d) {
       if (d.target.data.branch_info) {
-            var positiveRate = d.target.data.positiveRate;
-            return colorByRate(positiveRate);
+            var rate = d.target.data.positiveRate;
+            return colorByRate(rate);
           }
     });
 
@@ -1392,6 +1401,7 @@ function updateNodeColorsOnClick(x) {
         //console.log("debug no data "+d)
       }
     });
+
   // The color of a branch depends on the number of positive sites in its node
   g.selectAll('path.link')
     .style('stroke', function(d) {
