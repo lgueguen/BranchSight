@@ -57,7 +57,6 @@ Modified by Grégoire ALIZADEH NOIRET, 15 March 2023
 // Recuperation des variables envoyees via Express
 // ----------------------------------------------
 var recTree = <%- arbre %>;
-var branchSite = <%- branchSite %>;
 var logBranchLength = <%- logBranchLength %>;
 
 // Variables globales
@@ -339,14 +338,10 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
   // Ajustement du pas selon le type de séquences affichées
   hStep = displaySeqType == 'AA' ? hStepBase : hStepBase*3 ;
   var seqblocks = d3.selectAll('.seqblock');
-  if (!resultsJSON && branchSite) {
+  if (!resultsJSON) {
     showTooltip();
     writeTooltip('Please click a node to display branch data');
     resultsJSON = new Array(maxSeqLen).fill(-1);
-  } else if (!resultsJSON && !branchSite) {
-    hideTooltip();
-    resultsJSON = JSON.parse(xmlparser.flatTree(recTree.phyloxml.phylogeny.global_results.results));
-    // console.log('Results undefined, not branch-site');
   } else {
     maxSeqLen = resultsJSON.length;
   }
@@ -431,7 +426,7 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
         .style('stroke-width', '0')
         .style('stroke', '#000000')
         .on('mouseover', function(d) {
-          if (branchSite && selectedNode) {
+          if (selectedNode) {
             showTooltip();
             // Display a tooltip when hovering the cursor over a node
             if (d.data.branch_info) {
@@ -1137,10 +1132,6 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
       aablockEnter
       .merge(aablock)
       .attr("transform",function(d,i) {
-        // var transx = (d.pos)*hStep + margin.left + 30 ;
-        //  if (branchSite) {
-        //  transx = (d.pos)*hStep + seq_lg + 50 ;
-        // }
         var transx = (d.pos)*hStep + seq_lg + 50 ;
         if (isDNA == 1 ) {
           transx = transx - 80 ;// ???
@@ -1166,10 +1157,6 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
       aablockEnter
       .merge(aablock)
       .attr("transform",function(d,i) {
-        // var transx = (d.pos)*hStep + margin.left + 30 ;
-        //  if (branchSite) {
-        //  transx = (d.pos)*hStep + seq_lg + 50 ;
-        // }
         var transx = (d.pos)*hStep + seq_lg + 50 ;
         if (isDNA == 1 ) {
           transx = transx - 80 ;// ???
@@ -1216,10 +1203,6 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
         dnablockEnter
         .merge(dnablock)
         .attr("transform",function(d,i) {
-          // var transx = (d.pos)*hStep + margin.left + 30 ;
-          // if (branchSite) {
-          //   transx = (d.pos)*hStep + seq_lg + 50 ;
-          // }  
           var transx = (d.pos)*hStep + seq_lg + 50 ;
           var transy = d.y - 7 ;
           return "translate("+transx+", "+transy+")";
@@ -1365,10 +1348,9 @@ function minStatJSON(jsonResultsList) {
 // -------------------------------------------------------
 function colorByRate(rate) {
     if (upperThresholdMode) {
-        return 'hsl(0, 100%, '+ (85 * (1 - rate)^2)+'%)';
+        return 'hsl(0, 100%, '+ Math.min(90,(85 * (1 - rate)^2))+'%)';
     } else {
         return 'hsl(250, 100%, '+ Math.min(85,(85 * (1 - rate)^2)) +'%)';
-//        return 'hsl(250, 100%, '+ (85 * (1 - rate)^2) +'%)';
     }
 }
  
@@ -1980,9 +1962,8 @@ $(document).ready(function() {
   if (!isCodon) {
       $('#alignment-type').hide();
   }
-  if (!branchSite) {
-    $('#left-boundary, #right-boundary').prop('disabled', true);
-  }
+  $('#left-boundary, #right-boundary').prop('disabled', true);
+  
   $('input#automatic-boundaries').change(function (e) {
     if ($(this).is(':checked')) {
       automaticBoundaries = true;
