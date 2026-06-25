@@ -409,7 +409,27 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
     .attr("fill","none")
     .attr("stroke-width",configLayout.linkStrokeSize)
     .attr("stroke","#0e2e2e")
-    .attr("d", diagonal);
+    .attr("d", diagonal)
+            .on('mouseover', function(d) {
+          if (selectedNode) {
+            showTooltip();
+            // Display a tooltip when hovering the cursor over a node
+            if (d.target.data.branch_info) {
+              if (modeSite) {
+                  writeTooltip(getValueJSON(d.target.data.branch_info.results, selectedSite).toFixed(3));
+              } else {
+                  writeTooltip(getPositiveStatsJSON(stats_type,d.target.data.branch_info.results, leftBoundary, rightBoundary).toFixed(3));
+              }    
+            } else {
+              writeTooltip('');
+            }
+          }
+        })
+        .on('mouseout', function() {
+          if (selectedNode) {
+            hideTooltip();
+          }
+        });
   // D3:  Objets NODE
   var node = g.selectAll(".node").data(nodes);
   node.exit().remove();
