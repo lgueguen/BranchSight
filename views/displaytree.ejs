@@ -1704,7 +1704,7 @@ function  addNumberSeqSpec(treeRoot) {
     }
   });
 }
-// Fonction qui collapse les noeuds d'une certaine profondeur
+// Fonction qui ouvre les noeuds d'une certaine profondeur
 // ----------------------------------------------------------
 function expandTree(treeRoot) {
   treeRoot.each(function (d) {
@@ -1719,17 +1719,17 @@ function expandTree(treeRoot) {
     }
   });
 }
-// Fonction qui collapse les noeuds d'une certaine profondeur
-// ----------------------------------------------------------
-function expandTree(treeRoot) {
+// Fonction qui reinitialise l'arbre
+// -------- -------------------------
+function resetTree(treeRoot) {
   treeRoot.each(function (d) {
+    if (!d.data.clade) {
+      d.data.clade = d.data._clade;
+      d.data._clade = null;
+    }
     if (d.data.nodeinfo) {
       if (d.data.nodeinfo.status === "collapsed") {
-        if (d.data._clade) {
-          d.data.clade = d.data._clade;
-          d.data._clade = null;
-          d.data.nodeinfo = {status : "extended"};
-        }
+        d.data.nodeinfo = {status : "extended"};
       }
     }
   });
@@ -1841,6 +1841,14 @@ $('#globalexpand').on('click', function(event, dropdownData) {
     return d.clade;
   });
   expandTree(treeRoot);
+  updateLayout(cladeRoot);
+});
+$('#resettree').on('click', function(event, dropdownData) {
+  cladeRoot = recTree.phyloxml.phylogeny.clade;
+  treeRoot = d3.hierarchy(cladeRoot, function(d) {
+    return d.clade;
+  });
+  resetTree(treeRoot);
   updateLayout(cladeRoot);
 });
 $('#moreWidth').on('click', function(event, dropdownData) {
