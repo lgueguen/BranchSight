@@ -127,8 +127,8 @@ var upperThresholdMode = true;
 var modStepX = 150;               // Pas de la variation en largeur
 var modStepY = 5;                 // Pas de la variation en hauteur
 var stats_type  = "proportion";
-var mode_site = false;  //false : mode fenetre, true : mode site
-var selected_site = 0;
+var modeSite = false;  //false : mode fenetre, true : mode site
+var selectedSite = 0;
 
 // Dico des aa ( a ameliorer)
 var hslaa = new Object();
@@ -409,7 +409,27 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
     .attr("fill","none")
     .attr("stroke-width",configLayout.linkStrokeSize)
     .attr("stroke","#0e2e2e")
-    .attr("d", diagonal);
+    .attr("d", diagonal)
+            .on('mouseover', function(d) {
+          if (selectedNode) {
+            showTooltip();
+            // Display a tooltip when hovering the cursor over a node
+            if (d.target.data.branch_info) {
+              if (modeSite) {
+                  writeTooltip(getValueJSON(d.target.data.branch_info.results, selectedSite).toFixed(3));
+              } else {
+                  writeTooltip(getPositiveStatsJSON(stats_type,d.target.data.branch_info.results, leftBoundary, rightBoundary).toFixed(3));
+              }    
+            } else {
+              writeTooltip('');
+            }
+          }
+        })
+        .on('mouseout', function() {
+          if (selectedNode) {
+            hideTooltip();
+          }
+        });
   // D3:  Objets NODE
   var node = g.selectAll(".node").data(nodes);
   node.exit().remove();
@@ -430,8 +450,8 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
             showTooltip();
             // Display a tooltip when hovering the cursor over a node
             if (d.data.branch_info) {
-              if (mode_site) {
-                  writeTooltip(getValueJSON(d.data.branch_info.results, selected_site).toFixed(3));
+              if (modeSite) {
+                  writeTooltip(getValueJSON(d.data.branch_info.results, selectedSite).toFixed(3));
               } else {
                   writeTooltip(getPositiveStatsJSON(stats_type,d.data.branch_info.results, leftBoundary, rightBoundary).toFixed(3));
               }    
@@ -655,8 +675,8 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
   document.getElementById(compactWindow.attr('id')).onmousedown = function(e) {
     scrollAlignment(e);
     compactWindow.on('mousemove', function (e) {
-      mode_site = false;
-      console.log("MODE_SITE " + mode_site);
+      modeSite = false;
+      console.log("MODE_SITE " + modeSite);
       scrollAlignment(e);
     });
     compactWindow.on('mouseup', function (e) {
@@ -726,11 +746,11 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
     .attr("width",  50 + seq_lg + 10 + resultsJSON.length*hStep + 10 + seq_lg + 50)
     .attr("height",  heightSVG + margin.top + margin.down + 100);
   // === Définition de l'échelle pour l'axe x ===
-  var x = d3.scaleLinear()
+  var xScale = d3.scaleLinear()
     .domain([1, resultsJSON.length+1])
     .range([0, psGraphWidth]);
   // === Définition de l'échelle pour l'axe y ===
-  var y = d3.scaleLinear()
+  var yScale = d3.scaleLinear()
     .domain([minStatJSON(resultsJSON), maxStatJSON(resultsJSON)])
     .range([psGraphHeight, 0]);
   // === Ajout du graphe des résultats au SVG ===
@@ -740,10 +760,10 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
   // === Ajout de l'axe x au graphe ===
   psGraph.append('g')
     .attr('transform', 'translate(0,' + psGraphHeight + ')')
-    .call(d3.axisBottom(x).ticks(resultsJSON.length/5)); // graduations tous les 5 codons / AA
+    .call(d3.axisBottom(xScale).ticks(resultsJSON.length/5)); // graduations tous les 5 codons / AA
   // === Ajout de l'axe y au graphe ===
   psGraph.append('g')
-    .call(d3.axisLeft(y));
+    .call(d3.axisLeft(yScale));
   // === Calcul du décalage des sites pour le positionnement des rectangles du graphe ===
   // === Association des données aux futurs rectangles ===
   var rects = psGraph
@@ -774,7 +794,7 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
       // })
       .attr('width', function(d) { return hStep; })
       .attr('height', 100)
-      .attr('x', function(d) { i ++; return x(i - siteOffset); })
+      .attr('x', function(d) { i ++; return xScale(i - siteOffset); })
       .attr('y', 0)
       .style('fill', "white")
       .style('stroke', '#000000')
@@ -787,16 +807,8 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
       .on('mouseout', hideTooltip)
       .on('click', function(index,d) {
         //console.log("click " + index + "=>"+d);
-        mode_site = true;
-        selected_site = d;
-        svgmarker.select("#marker").remove();
-        svgmarker.append('rect')
-        .attr('id', "marker")
-        .attr('width', 5)
-        .attr('height', 100)
-        .attr("x", x(d -siteOffset))
-        .attr('y', 100)
-        .style('fill', "pink");
+        modeSite = true;
+        selectedSite = d;
         writeTooltip(d);
         showTooltip();
         updateNodeColorsOnClick(d);
@@ -816,20 +828,20 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
       // })
       .attr('width', function(d) { return hStep; })
       .attr('height', function(d) {
-      if ( y(0)>=y(d) ) {
-      return y(0) - y(d);
+      if ( yScale(0)>=yScale(d) ) {
+      return yScale(0) - yScale(d);
       }
       else {
-      return y(d) - y(0);
+      return yScale(d) - yScale(0);
       }
       })
-      .attr('x', function(d) { i ++; return x(i - siteOffset); })
+      .attr('x', function(d) { i ++; return xScale(i - siteOffset); })
       .attr('y', function(d) { 
-        if ( y(0)<=y(d) ) {
-        return y(0);
+        if ( yScale(0)<=yScale(d) ) {
+        return yScale(0);
         }
         else {
-          return y(d);
+          return yScale(d);
         }
       })
       .style('fill', function(d) {
@@ -845,16 +857,8 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
       .on('mouseout', hideTooltip)
       .on('click', function(index,d) {
         //console.log("click " + index + "=>"+d);
-        mode_site = true;
-        selected_site = d;
-        svgmarker.select("#marker").remove();
-        svgmarker.append('rect')
-        .attr('id', "marker")
-        .attr('width', 5)
-        .attr('height', 100)
-        .attr("x", x(d -siteOffset))
-        .attr('y', 100)
-        .style('fill', "pink");
+        modeSite = true;
+        selectedSite = d;
         writeTooltip(d);
         showTooltip();
         updateNodeColorsOnClick(d);
@@ -866,40 +870,40 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
   // Ajout du seuil supérieur au graphe
   if (upperThresholdMode){
     psGraph.append('line')
-      .attr('x1', x(1))
-      .attr('y1', y(psThresholdMaxUp))
-      .attr('x2', x(resultsJSON.length+1))
-      .attr('y2', y(psThresholdMaxUp))
+      .attr('x1', xScale(1))
+      .attr('y1', yScale(psThresholdMaxUp))
+      .attr('x2', xScale(resultsJSON.length+1))
+      .attr('y2', yScale(psThresholdMaxUp))
       .style('stroke', '#000000')
       // .style('stroke', psThresholdMaxUpBgColor)
       .style('stroke-width', '2')
       .style('stroke-dasharray', ('4, 4'));
     // Ajout du seuil inférieur au graphe
     psGraph.append('line')
-      .attr('x1', x(1))
-      .attr('y1', y(psThresholdMinUp))
-      .attr('x2', x(resultsJSON.length+1))
-      .attr('y2', y(psThresholdMinUp))
+      .attr('x1', xScale(1))
+      .attr('y1', yScale(psThresholdMinUp))
+      .attr('x2', xScale(resultsJSON.length+1))
+      .attr('y2', yScale(psThresholdMinUp))
       .style('stroke', '#000000')
       // .style('stroke', psThresholdMinUpBgColor)
       .style('stroke-width', '1')
       .style('stroke-dasharray', ('4, 4'));
   } else {
     psGraph.append('line')
-      .attr('x1', x(1))
-      .attr('y1', y(psThresholdMaxDown))
-      .attr('x2', x(resultsJSON.length+1))
-      .attr('y2', y(psThresholdMaxDown))
+      .attr('x1', xScale(1))
+      .attr('y1', yScale(psThresholdMaxDown))
+      .attr('x2', xScale(resultsJSON.length+1))
+      .attr('y2', yScale(psThresholdMaxDown))
       .style('stroke', '#000000')
       // .style('stroke', psThresholdMaxDownBgColor)
       .style('stroke-width', '2')
       .style('stroke-dasharray', ('4, 4'));
     // Ajout du seuil inférieur au graphe
     psGraph.append('line')
-      .attr('x1', x(1))
-      .attr('y1', y(psThresholdMinDown))
-      .attr('x2', x(resultsJSON.length+1))
-      .attr('y2', y(psThresholdMinDown))
+      .attr('x1', xScale(1))
+      .attr('y1', yScale(psThresholdMinDown))
+      .attr('x2', xScale(resultsJSON.length+1))
+      .attr('y2', yScale(psThresholdMinDown))
       .style('stroke', '#000000')
       // .style('stroke', psThresholdMinDownBgColor)
       .style('stroke-width', '1')
@@ -907,18 +911,6 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
   }
   psGraph.append('br');
 
-  // === Ajout du graphe des résultats au SVG ===
-  var svgmarker = svg3.append('g')
-    .attr('id', 'svgmarker')
-    .attr('transform', 'translate('+(50 + seq_lg)+', '+psGraphMargins.top+')');
-  
-  // svgmarker.append('rect')
-  //     .attr('id', "marker")
-  //     .attr('width', 5)
-  //     .attr('height', 100)
-  //     .attr('x', 100)
-  //     .attr('y', 100)
-  //     .style('fill', "pink");
 
   console.log("graphes OK");
   // ====================================================
@@ -1794,8 +1786,8 @@ $('#stats').on('click', function(event, dropdownData) {
   }
 if (target.text != undefined) {
   // updateLayout(cladeRoot,0,0);
-  if (mode_site) {
-    updateNodeColorsOnClick(selected_site);
+  if (modeSite) {
+    updateNodeColorsOnClick(selectedSite);
   }
   else {
     updateNodeColors();
