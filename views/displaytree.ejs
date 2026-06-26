@@ -348,7 +348,7 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
   //resultsJSON = resultsJSON;
   var psGraphMargins = {top: 20, right: 50, bottom: 50, left: 50+seq_lg};
   var psGraphWidth = resultsJSON.length*hStep;
-  var psGraphHeight = 100;
+  var psGraphHeight = 80;
   // ==============================================================
   // Fin modif : variables pour graphe et séquences
   // ==============================================================
@@ -615,8 +615,8 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
     .style("top", "0px");    
   }
   else {
-    svg3.attr("height",  200);
-    svgbidon.attr("height",  200);
+    svg3.attr("height",  110);
+    svgbidon.attr("height",  100);
     svg0.attr("height",  psGraphGlobalHeight);
     d3.select("#tree-container")
     .style("top", "300px");
