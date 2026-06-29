@@ -350,7 +350,7 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
   //resultsJSON = resultsJSON;
   var psGraphMargins = {top: 20, right: 50, bottom: 50, left: 50+seq_lg};
   var psGraphWidth = resultsJSON.length*hStep;
-  var psGraphHeight = 80;
+  var psGraphHeight = 100;
   // ==============================================================
   // Fin modif : variables pour graphe et séquences
   // ==============================================================
@@ -637,8 +637,8 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
     .style("top", "0px");    
   }
   else {
-    svg3.attr("height",  110);
-    svgbidon.attr("height",  100);
+    svg3.attr("height",  150);
+    svgbidon.attr("height",  150);
     svg0.attr("height",  psGraphGlobalHeight);
     d3.select("#tree-container")
     .style("top", "300px");
@@ -750,7 +750,7 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
   // === Définition de l'échelle pour l'axe x ===
   var xScale = d3.scaleLinear()
     .domain([1, resultsJSON.length+1])
-    .range([0, psGraphWidth]);
+    .range([1, psGraphWidth]);
   // === Définition de l'échelle pour l'axe y ===
   var yScale = d3.scaleLinear()
     .domain([minStatJSON(resultsJSON), maxStatJSON(resultsJSON)])
@@ -761,7 +761,7 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
     .attr('transform', 'translate('+(50 + seq_lg)+', '+psGraphMargins.top+')');
   // === Ajout de l'axe x au graphe ===
   psGraph.append('g')
-    .attr('transform', 'translate(0,' + psGraphHeight + ')')
+    .attr('transform', 'translate(10,' + psGraphHeight + ')')
     .call(d3.axisBottom(xScale).ticks(resultsJSON.length/5)); // graduations tous les 5 codons / AA
   // === Ajout de l'axe y au graphe ===
   psGraph.append('g')
