@@ -803,7 +803,7 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
       .style('stroke-width', '0')
       .on('mouseover', function(d) {
         // console.log(d);
-        writeTooltip(d);
+        writeTooltip(d.toFixed(3));
         showTooltip();
       })
       .on('mouseout', hideTooltip)
@@ -853,7 +853,7 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
       .style('stroke-width', '0')
       .on('mouseover', function(d) {
         // console.log(d);
-        writeTooltip(d);
+        writeTooltip(d.toFixed(3));
         showTooltip();
       })
       .on('mouseout', hideTooltip)
@@ -1345,9 +1345,9 @@ function minStatJSON(jsonResultsList) {
 // -------------------------------------------------------
 function colorByRate(rate) {
     if (upperThresholdMode) {
-        return 'hsl(0, 100%, '+ Math.min(90,(85 * (1 - rate)^2))+'%)';
+        return hsl2col([0, 100, Math.min(95,(85 * (1 - rate)^2))]);
     } else {
-        return 'hsl(250, 100%, '+ Math.min(85,(85 * (1 - rate)^2)) +'%)';
+        return hsl2col([250, 100, Math.min(95,(85 * (1 - rate)^2))]);
     }
 }
  
@@ -1497,18 +1497,19 @@ function getPositiveRateJSON(textResultsList, leftB, rightB) {
   var jsonResultsList = JSON.parse(textResultsList);
   var nbPos = 0;
   jsonResultsList.forEach((value, site) => {
+  if (site >= leftB && site <= rightB) {
     if (upperThresholdMode) {
-      if (value >= psThresholdMaxUp && site >= leftB && site <= rightB) {
-        nbPos ++;
+      if (value >= psThresholdMaxUp) {
+          nbPos ++;
       }
     } else {
-      if (value >= 0 && value <= psThresholdMaxDown && site >= leftB && site <= rightB) {
-        nbPos ++;
+      if (value <= psThresholdMaxDown) {
+          nbPos ++;
       }
     }
-  });
-  //console.log("Fraction beyond limit = "+ nbPos/(rightBoundary - leftBoundary + 1))
-  return nbPos/(rightBoundary - leftBoundary + 1);
+  }
+  })
+  return nbPos/(rightB - leftB + 1);
 }
 
 // Get the max  of positive sites within the indicated boundaries
@@ -1523,15 +1524,17 @@ function getPositiveMaxJSON(textResultsList, leftB, rightB) {
   }
   
   jsonResultsList.forEach((value, site) => {
+  if (site >= leftB && site <= rightB) {
     if (upperThresholdMode) {
-      if (value >  posMax && site >= leftB && site <= rightB) {
+      if (value >  posMax) {
         posMax = value;
       }
      } else {
-      if (value <  posMax && site >= leftB && site <= rightB) {
+      if (value <  posMax) {
         posMax = value;
       }
      }    
+     }
   });
   //console.log("Extreme value = "+posMax);
   return posMax;
