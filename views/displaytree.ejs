@@ -120,6 +120,7 @@ var leftBoundary = 0;
 var rightBoundary = 1;
 var firstLoad = 1;
 var automaticBoundaries = true;
+var percentWindowStat = 100;
 var siteOffset = 0;
 var nbBranches = 0;
 var nbLeaves = 0;
@@ -1817,6 +1818,15 @@ if (target.text != undefined) {
   }
 }
 });
+
+
+// Gestion de la taille de la fenetre
+  $('#stat_percent').on('change', function(event) {
+    percentWindowStat = parseFloat($('#stat_percent').val());
+    console.log(" DEBUG PercentWindowStat "+ percentWindowStat);
+    updateLayout(cladeRoot);
+  });
+
 
 $('#action').on('click', function(event, dropdownData) {
   event.preventDefault();
