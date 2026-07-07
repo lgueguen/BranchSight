@@ -281,3 +281,19 @@ a {
 .custom-file-input {
   min-height: 75px;
 }
+
+#toolbar{
+    display:flex;
+    align-items:center;
+    gap:.4rem;
+
+    flex-wrap:nowrap;
+
+    flex:1;
+
+    scrollbar-width:thin;
+}
+
+#toolbar>*{
+    flex-shrink:0;
+}

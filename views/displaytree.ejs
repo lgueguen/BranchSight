@@ -16,9 +16,11 @@ Modified by Grégoire ALIZADEH NOIRET, 15 March 2023
 
 <body>
   <header style="z-index: 100">
-    <nav id="main-nav" class="navbar navbar-default navbar-fixed-top" style="background-color:white; z-index: 100">
-      <%- include('../partials/header') %>
-      <%- include('../partials/buttons') %>
+    <%- include('../partials/header') %>
+    <nav id="main-nav" class="navbar navbar-default navbar-fixed-top" style="background-color:white; z-index: 100"></nav>
+      <div id="toolbar">
+        <%- include('../partials/buttons') %>
+      </div>
     </nav>
   </header>
   <main>    
