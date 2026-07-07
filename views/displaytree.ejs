@@ -417,15 +417,15 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
             showTooltip();
             // Display a tooltip when hovering the cursor over a node
             if (d.target.data.branch_info) {
-                if (d.target.data.positiveRate) {
-                  writeTooltip(d.target.data.positiveRate.toFixed(3));
+                // if (d.target.data.positiveRate) {
+                //   writeTooltip(d.target.data.positiveRate.toFixed(3));
+                // } else {
+                if (modeSite) {
+                    writeTooltip(getTransitionJSON(d.source.data.lastEvent, d.target.data.lastEvent, selectedSite));
                 } else {
-                    if (modeSite) {
-                        writeTooltip(getValueJSON(d.target.data.branch_info.results, selectedSite).toFixed(3));
-                    } else {
-                        writeTooltip(getPositiveRateJSON(d.target.data.branch_info.results, leftBoundary, rightBoundary).toFixed(3));
-                    }
+                    writeTooltip(getPositiveRateJSON(d.target.data.branch_info.results, leftBoundary, rightBoundary).toFixed(3));
                 }
+//                }
             } else {
                 writeTooltip('');
             }
@@ -1559,6 +1559,28 @@ function getValueJSON(textResultsList, position_x) {
     //console.log("value = "+valuePos);
     return valuePos;
 }
+
+// Get the transition on a ste & branch"
+  
+  function getTransitionJSON(node, target, position_x) {
+      if (displaySeqType == "Nuc") {
+        if (isCodon)
+          {
+              var targetseq = target.dnaAlign[3*position_x]+target.dnaAlign[3*position_x+1]+target.dnaAlign[3*position_x+2];
+              var nodeseq = node.dnaAlign[3*position_x]+node.dnaAlign[3*position_x+1]+node.dnaAlign[3*position_x+2];
+          } else {
+              var targetseq = target.dnaAlign[position_x];
+              var nodeseq = node.dnaAlign[position_x];
+          }
+      } else {
+          var targetseq = target.aaAlign[position_x];
+          var nodeseq = node.aaAlign[position_x];
+      }
+
+
+      return nodeseq + ":" + targetseq;
+  }
+  
   
 // Fonction de test du support local.storage
 // ------------------------------------------
