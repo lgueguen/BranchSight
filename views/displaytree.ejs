@@ -344,12 +344,9 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
   var seqblocks = d3.selectAll('.seqblock');
   if (!resultsJSON) {
     showTooltip();
-    writeTooltip('Please click a node to display branch data');
-    resultsJSON = new Array(maxSeqLen).fill(-1);
-  } else {
-    maxSeqLen = resultsJSON.length;
-  }
-  //resultsJSON = resultsJSON;
+    writeTooltip('Please click any tree node to display branch data');
+    resultsJSON = JSON.parse(treeRoot.data.branch_info.results);
+  } 
   var psGraphMargins = {top: 20, right: 50, bottom: 50, left: 50+seq_lg};
   var psGraphWidth = resultsJSON.length*hStep;
   var psGraphHeight = 100;
@@ -476,6 +473,8 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
         .on('click', function(d) {
           if (action == svgEvents.showBranchResults && d.data.branch_info) {
             resultsJSON = JSON.parse(d.data.branch_info.results);
+            console.log("DEBUG")
+            console.log(this)
             selectedNode = d3.select(this);
           }
         });
