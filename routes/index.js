@@ -1,3 +1,6 @@
+//SPDX-FileCopyrightText: Laurent Guéguen, Simon Penel, LBBE, UMR CNRS 558, Univ Lyon 1, Franc 
+//SPDX-License-Identifier: CECILL-2.1
+
 // 
 // Modified by Genna BEN HASSEN, Camille SIHARATH and Grégoire ALIZADEH NOIRET, 16 December 2021
 // Modified by Grégoire ALIZADEH NOIRET, 19 July 2022

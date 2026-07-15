@@ -1,3 +1,7 @@
+#SPDX-FileCopyrightText: Laurent Guéguen, Simon Penel, LBBE, UMR CNRS 558, Univ Lyon 1, France
+#
+#SPDX-License-Identifier: CECILL-2.1
+
 # Methods to perform ancestral sequence reconstruction on a tree, given sequences at leaves
 #
 # Up to now, only maximum parsimony. Indels are minimized (ie most

@@ -1,6 +1,10 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+#SPDX-FileCopyrightText: Laurent Guéguen, Simon Penel, LBBE, UMR CNRS 558, Univ Lyon 1, Franc 
+#SPDX-License-Identifier: CECILL-2.1
+
+
 """
 Module for tree management.
 

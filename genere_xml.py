@@ -1,3 +1,7 @@
+#SPDX-FileCopyrightText: Laurent Guéguen, Simon Penel, LBBE, UMR CNRS 558, Univ Lyon 1, France
+#
+#SPDX-License-Identifier: CECILL-2.1
+
 """
 Ecrit un  arbre au format XML .
 Usage:

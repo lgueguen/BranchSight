@@ -473,8 +473,8 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
         .on('click', function(d) {
           if (action == svgEvents.showBranchResults && d.data.branch_info) {
             resultsJSON = JSON.parse(d.data.branch_info.results);
-            console.log("DEBUG")
-            console.log(this)
+            //console.log("DEBUG")
+            //console.log(this)
             selectedNode = d3.select(this);
           }
         });
@@ -816,7 +816,7 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
         //console.log("click " + index + "=>"+d);
         modeSite = true;
         selectedSite = d;
-        writeTooltip(d);
+        writeTooltip(d+1);
         showTooltip();
         updateNodeColorsOnClick(d);
       })
@@ -866,7 +866,7 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
         //console.log("click " + index + "=>"+d);
         modeSite = true;
         selectedSite = d;
-        writeTooltip(d);
+        writeTooltip(d+1);
         showTooltip();
         updateNodeColorsOnClick(d);
       })
@@ -1517,7 +1517,6 @@ function writeTooltip(text) { $('.tooltip').text(text); }
 //   Given a preci
 // --------------------------------------------------------------
 function getPositiveRateJSON(textResultsList, leftB, rightB) {
-    console.log("getPositiveRateJSON");
   var jsonResultsList = JSON.parse(textResultsList);
 
   var mid = (leftB + rightB)/2;
@@ -1850,7 +1849,7 @@ if (target.text != undefined) {
 // Gestion de la taille de la fenetre
 $('#stat_precision').on('change', function(event) {
     precisionWindowStat = parseFloat($('#stat_precision').val());
-    console.log(" DEBUG PrecisionWindowStat "+ precisionWindowStat);
+//    console.log(" DEBUG PrecisionWindowStat "+ precisionWindowStat);
 //    updateLayout(cladeRoot);
     if (modeSite) {
         updateNodeColorsOnClick(selectedSite);
@@ -2130,10 +2129,10 @@ $(document).ready(function() {
     psThresholdMaxDown = psMaxDown;
     psThresholdMinUp = psMinUp;
     psThresholdMinDown = psMinDown;
-    console.log(psThresholdMaxUp);
-    console.log(psThresholdMaxDown);
-    console.log(psThresholdMinUp);
-    console.log(psThresholdMinDown);
+//    console.log(psThresholdMaxUp);
+//    console.log(psThresholdMaxDown);
+//    console.log(psThresholdMinUp);
+//    console.log(psThresholdMinDown);
     updateLayout(cladeRoot);
   });
 });

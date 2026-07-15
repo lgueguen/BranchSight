@@ -1,3 +1,6 @@
+//SPDX-FileCopyrightText: Laurent Guéguen, Simon Penel, LBBE, UMR CNRS 558, Univ Lyon 1, Franc 
+//SPDX-License-Identifier: CECILL-2.1
+
 // Constants
 // addition port 8080  (port 3000 still working)
 // const PORT = 8080;
