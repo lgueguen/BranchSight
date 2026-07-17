@@ -189,23 +189,33 @@ class Node(object):
 
   def intersect_ancestral_labels(self):
     """sets recursively labels of ancestral nodes as the intersection
-    of children prefixes, if the labels are different from the default
-    "N\d+".
+    of children prefixes, as suffix of default "N\d+, if the labels
+    are different.
 
     Returns the label of this node
 
     """
 
     pat=re.compile("\AN\d+\Z")
+    pat2=re.compile("\AN\d+_")
 
     labc = [child.intersect_ancestral_labels() for child in self.get_children()]
-    lok = [l for l in labc if len(pat.findall(l))==0]
+    labc2 = []
+    for l in labc:
+      pref = pat2.findall(l)
+      if len(pref)==0:
+        labc2.append(l)
+      else:
+        labc2.append(l[len(pref[0]):])
 
-    prefok = os.path.commonprefix(lok)
-    prefok = prefok.strip("_:.")
+    lok = [l for l in labc2 if len(pat.findall(l))==0]
 
-    if len(prefok)>=4:
-      self.add_label(prefok)
+    if len(lok)==len(labc2): # at least one anonymous child -> anonymous parent
+      prefok = os.path.commonprefix(lok)
+      prefok = prefok.strip("_:.")
+
+      if len(prefok)>=4:
+        self.add_label(self.label() + "_" + prefok)
 
     return self.label()
     
