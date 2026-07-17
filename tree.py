@@ -197,9 +197,17 @@ class Node(object):
     """
 
     pat=re.compile("\AN\d+\Z")
+    pat2=re.compile("\AN\d+_")
 
     labc = [child.intersect_ancestral_labels() for child in self.get_children()]
-    labc2 = [l.split(" ")[-1] for l in labc]
+    labc2 = []
+    for l in labc:
+      pref = pat2.findall(l)
+      if len(pref)==0:
+        labc2.append(l)
+      else:
+        labc2.append(l[len(pref[0]):])
+
     lok = [l for l in labc2 if len(pat.findall(l))==0]
 
     if len(lok)==len(labc2): # at least one anonymous child -> anonymous parent
@@ -207,7 +215,7 @@ class Node(object):
       prefok = prefok.strip("_:.")
 
       if len(prefok)>=4:
-        self.add_label(self.label() + " " + prefok)
+        self.add_label(self.label() + "_" + prefok)
 
     return self.label()
     
