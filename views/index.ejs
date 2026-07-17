@@ -1,10 +1,9 @@
-<!-- 
-
-Modified by Genna BEN HASSEN, Camille SIHARATH and Grégoire ALIZADEH NOIRET, 16 December 2021
-Modified by Grégoire ALIZADEH NOIRET, 15 March 2023
-Modified by Laurent GUÉGUEN, 6 March 2023
-
+<!--
+Authors  Genna BEN HASSEN, Camille SIHARATH, Grégoire ALIZADEH NOIRET, Simon PENEL and Laurent GUEGUEN
+2021-2026
+CNRS UCBL LBBE
 -->
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -18,22 +17,12 @@ Modified by Laurent GUÉGUEN, 6 March 2023
   <body>
     <header>
       <%- include('../partials/header') %>
-      <!-- <div class="container-fluid">
-        <h1 class="main-title text-center">Branch Site Statistics</h1>
-      </div> -->
     </header>
-
     <main>
       <h1 class="main-title text-center">Branch Site Statistics</h1>
 
       <div class="form-mod">
         <form method="post" action="/upload_files" enctype="multipart/form-data">
-          <!-- <div class="row mb-3"> -->
-          <!--   <div class="form-check form-switch"> -->
-          <!--     <input id="isNuc" class="form-check-input" type="checkbox" name="isNuc" checked> -->
-          <!--     <label class="form-check-label" for="isNuc">Codons</label> -->
-          <!--   </div> -->
-          <!-- </div> -->
 
           <div class="row mb-3">
             <div class="form-check form-switch">
@@ -41,24 +30,6 @@ Modified by Laurent GUÉGUEN, 6 March 2023
               <label class="form-check-label" for="logBranchLength">Log branch length</label>
             </div>
           </div>
-
-          <!-- <div class="row mb-3"> -->
-          <!--   <div class="form-check form-switch"> -->
-          <!--     <input id="skipMissingSites" class="form-check-input" type="checkbox" name="skipMissingSites"> -->
-          <!--     <label class="form-check-label" for="skipMissingSites">Consider site numbers</label> -->
-          <!--   </div> -->
-          <!-- </div> -->
-          
-          <!-- <div class="row mb-3"> -->
-          <!--   <label class="form-check-label">Results type</label> -->
-          <!--   <div class="btn-group input-group" role="group" aria-label="Choice between site mode and branch-site mode"> -->
-          <!--     <input type="radio" class="btn-check" name="resultsType" id="siteMode" value="siteMode" checked> -->
-          <!--     <label class="btn btn-outline-secondary" for="siteMode">Site</label> -->
-
-          <!--     <input type="radio" class="btn-check" name="resultsType" id="branchSiteMode" value="branchSiteMode"> -->
-          <!--     <label class="btn btn-outline-secondary" for="branchSiteMode">Branch-site</label> -->
-          <!--   </div> -->
-          <!-- </div> -->
 
           <div class="row mb-2 custom-file-input">
             <label class="btn btn-light btn-sm btn-file d-flex flex-column justify-content-center">
@@ -68,6 +39,7 @@ Modified by Laurent GUÉGUEN, 6 March 2023
               <p class="filename"></p>
             </label>
           </div>
+
           <div class="row mb-2 custom-file-input">
             <label class="btn btn-light btn-sm btn-file d-flex flex-column justify-content-center">
               <i class="fa fa-upload fa-2x" aria-hidden="true">Alignment file</i>
@@ -75,6 +47,7 @@ Modified by Laurent GUÉGUEN, 6 March 2023
               <p class="filename"></p>
             </label>
           </div>
+
           <div class="row mb-3 custom-file-input">
             <label class="btn btn-light btn-sm btn-file d-flex flex-column justify-content-center">
               <i class="fa fa-upload fa-2x" aria-hidden="true">Results file</i>
@@ -82,14 +55,8 @@ Modified by Laurent GUÉGUEN, 6 March 2023
               <p class="filename"></p>
             </label>
           </div>
-          
-          <!-- <div id="statcol-field" class="row mb-3"> -->
-          <!--   <label for="statcol">Statistics formula</label> -->
-          <!--   <input id="statcol" class="form-control" type="string" name="statcol" value="[1]" required /> -->
-          <!-- </div> -->
 
           <div class="row mb-2">
-            <!-- <label for="nostat">Missing statistics value</label> -->
             <input id="nostat" class="form-control" type="hidden" name="nostat" value="-1" step="1" required />
           </div>
 
@@ -103,76 +70,20 @@ Modified by Laurent GUÉGUEN, 6 March 2023
             <button onclick="window.location.href='/display_example?filepath=Ubr7.xml';"
             style="background-color:#C8E6C9; font-size:0.8rem;" class="btn btn-light"> Ubr7
           </div>
+
           <div class="row mt-3">
             <button onclick="window.location.href='/display_example?filepath=APOBEC3G_lpv.xml';"
                     style="background-color:#C8E6C9; font-size:0.8rem;" class="btn btn-light"> APOBEC3G : M2 vs M1
-          </div>  
+          </div>
+
           <div class="row mt-3">
             <button onclick="window.location.href='/display_example?filepath=APOBEC3G_ldNdS.xml';"
                     style="background-color:#C8E6C9; font-size:0.8rem;" class="btn btn-light"> APOBEC3G : log(dN/dS)
-          </div>  
+          </div>
+
         </form>
       </div>
-
-      <!-- <\!-- Exemple d'affichage -\-> -->
-
-      <!-- <div class="container-fluid text-center"> -->
-      <!--   <h2 class="text-center"><span class="text-muted">An example of display...</span></h2> -->
-      <!--   <img src="media/ExempleAffichage.png" alt="exemple d'affichage" /> -->
-      <!--   <h2 class="text-center"><span class="text-muted">...and its various options</span></h2> -->
-      <!-- </div> -->
-
-      <!-- Description des options d'affichage -->
-
-      <!-- <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4 py-5"> -->
-      <!--   <div class="col align-items-center"> -->
-      <!--     <div> -->
-      <!--       <h5 class="Option">On click</h5> -->
-      <!--       <p class="text-center">Reverse branches Select nodes to display</p> -->
-      <!--     </div> -->
-      <!--   </div> -->
-      <!--   <div class="col align-items-center"> -->
-      <!--     <div> -->
-      <!--       <h5 class="Option">Expand/Compact tree</h5> -->
-      <!--       <p class="text-center">Increase/Decrease spaces between branches</p> -->
-      <!--     </div> -->
-      <!--   </div> -->
-      <!--   <div class="col align-items-center"> -->
-      <!--     <div> -->
-      <!--       <h5 class="Option text-center">Alignment Type</h5> -->
-      <!--       <p class="text-center">Display of nucleotid or protein sequences</p> -->
-      <!--     </div> -->
-      <!--   </div> -->
-      <!--   <div class="col align-items-center"> -->
-      <!--     <div> -->
-      <!--       <h5 class="Option">WidthSize +/-</h5> -->
-      <!--       <p class="text-center">Increase/Decrease the tree's width</p> -->
-      <!--     </div> -->
-      <!--   </div> -->
-      <!--   <div class="col align-items-center"> -->
-      <!--     <div> -->
-      <!--       <h5 class="Option">HeightSize +/-</h5> -->
-      <!--       <p class="text-center">Increase/Decrease the tree's height</p> -->
-      <!--     </div> -->
-      <!--   </div> -->
-      <!--   <div class="col align-items-center"> -->
-      <!--     <div> -->
-      <!--       <h5 class="Option">ExportSVG</h5> -->
-      <!--       <p class="text-center">Results export in svg format</p> -->
-      <!--     </div> -->
-      <!--   </div> -->
-      <!--   <div class="col align-items-center"> -->
-      <!--     <div> -->
-      <!--       <h5 class="Option">Upper / Lower threshold</h5> -->
-      <!--       <p class="text-center">Choice of upper/lower threshold of positive selection values</p> -->
-      <!--     </div> -->
-      <!--   </div> -->
-      <!-- </div> -->
-      
-      <!-- <hr class="featurette-divider"> -->
-
       <footer class="container text-center">
-        <!-- <p class="float-end no-decoration"><a href="#">Back to top</a></p> -->
         <p>Laboratory of Biometry and Evolutionary Biology</p>
         <p>Claude Bernard Lyon 1 University</p>
       </footer>
@@ -199,29 +110,6 @@ Modified by Laurent GUÉGUEN, 6 March 2023
     +'</svg>';
 
   $(document).ready(function() {
-    // function updateForm() {
-    //   console.log('checked:', isChecked('branchSiteMode'));
-    //   if (isChecked('branchSiteMode')) {
-    //       $('#statcol-field').hide();
-    //       $('#statlink-bsmode').show();
-    //       $('#statlink-smode').hide();
-    //   } else {
-    //       $('#statcol-field').show();
-    //       $('#statlink-bsmode').hide();
-    //       $('#statlink-smode').show();
-    //   } 
-    // }
-    // function isChecked(checkboxId) {
-    //   return $('#'+checkboxId).is(':checked');
-    // }
-    // $('#branchSiteMode').ready(function(e) {
-    //   // console.log('branchSite ready');
-    //   updateForm();
-    // });
-    // $('#siteMode, #branchSiteMode').change(function (e) {
-    //   // console.log('branchSite updated');
-    //   updateForm();
-    // });
 
     $('[id$="-file-input"]').each(function(i, elt) {
       if ($('#'+elt.id).val() != '') {
@@ -233,16 +121,13 @@ Modified by Laurent GUÉGUEN, 6 March 2023
     
     $('input[type="file"]').change(function(e) {
       var filename = e.target.files[0].name;
-      //console.log('File changed on input with id: ' + e.target.id);
       var selectedFile = document.getElementById(e.target.id).files[0];
-      // var content = document.getElementById(e.target.id.split('-')[0]+'-file-content');
       var reader = new FileReader();
       reader.onload = function(event) {
         var lines = this.result.split('\n');
         var treeRegex = new RegExp('^[\(][A-Za-z0-9\.\-_,\(\):;]+');
         var alignmentRegex = new RegExp('^>.*(\r)?\n[ACGTU\-]+');
         var resultsRegex = new RegExp('[0-9]+((\t| )[\-]?[0-9]+[\.]?[0-9]+)+');
-        //console.log(reader.result);
         var isMatch = null;
         if (e.target.id.substring(0, 4) === 'tree') {
           isMatch = treeRegex.test(reader.result);
@@ -251,18 +136,12 @@ Modified by Laurent GUÉGUEN, 6 March 2023
         } else if (e.target.id.substring(0, 4) === 'resu') {
           isMatch = resultsRegex.test(reader.result);
         } else {
-          //console.log('Unrecognized ID: '+e.target.id);
+          console.log('Unrecognized ID: '+e.target.id);
         }
-        //console.log(isMatch);
         if (isMatch) {
           $("#"+e.target.id+" + .filename").html(checkIconHTML+'<br/>'+filename); 
         } else {
           $("#"+e.target.id+" + .filename").html(warningIconHTML+'<br/>'+filename); 
-        }
-        // content.innerHTML = '';
-        for (var i = 0; i < Math.min(lines.length, 4); i ++) {
-          // content.innerHTML += lines[i].substring(0, 80)+'<br>';
-          //console.log(lines[i].substring(0, 80));
         }
       };
       reader.readAsText(selectedFile);
