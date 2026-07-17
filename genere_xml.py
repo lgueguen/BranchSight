@@ -288,7 +288,7 @@ def ASR_compute(alignmentFile, treeFile, sites = []):
   for child in children:
     if not child.label() in align:
       if child in leaves:
-        print("Missing seq " + leaf.label() + " in " + alignmentFile)
+        print("Missing seq " + child.label() + " in " + alignmentFile, flush = True)
     else:
       child.set_sequence(align[child.label()])
 
