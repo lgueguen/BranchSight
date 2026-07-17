@@ -67,48 +67,47 @@ var nbSites = 0;
 var upperThresholdMode = true;
 var modStepX = 150;               // Pas de la variation en largeur
 var modStepY = 5;                 // Pas de la variation en hauteur
-var modeSite = false;  //false : mode fenetre, true : mode site
+var modeSite = false;             //false : mode fenetre, true : mode site
 var selectedSite = 0;
 
-// Dico des aa ( a ameliorer)
-var hslaa = new Object();
+var hslaa = new Object(); // Dictionnaire des aa
 
-hslaa["K"]= [8,80,50];
-hslaa["R"]= [8,80,50];
+  hslaa["K"]= [8,80,50];
+  hslaa["R"]= [8,80,50];
 
-hslaa["A"]= [210,80,50];
-hslaa["F"]= [210,80,50];
-hslaa["I"]= [210,80,50];
-hslaa["L"]= [210,80,50];
-hslaa["M"]= [210,80,50];
-hslaa["V"]= [210,80,50];
-hslaa["W"]= [210,80,50];
+  hslaa["A"]= [210,80,50];
+  hslaa["F"]= [210,80,50];
+  hslaa["I"]= [210,80,50];
+  hslaa["L"]= [210,80,50];
+  hslaa["M"]= [210,80,50];
+  hslaa["V"]= [210,80,50];
+  hslaa["W"]= [210,80,50];
 
-hslaa["N"]= [120,78,45];
-hslaa["Q"]= [120,78,45];
-hslaa["S"]= [120,78,45];
-hslaa["T"]= [120,78,45];
+  hslaa["N"]= [120,78,45];
+  hslaa["Q"]= [120,78,45];
+  hslaa["S"]= [120,78,45];
+  hslaa["T"]= [120,78,45];
 
-hslaa["H"]= [180,75,40];
-hslaa["Y"]= [180,75,40];
+  hslaa["H"]= [180,75,40];
+  hslaa["Y"]= [180,75,40];
 
-hslaa["C"]= [0,67,70];
+  hslaa["C"]= [0,67,70];
 
-hslaa["D"]= [300,55,55];
-hslaa["E"]= [300,55,55];
+  hslaa["D"]= [300,55,55];
+  hslaa["E"]= [300,55,55];
 
-hslaa["P"]= [60,100,40];
+  hslaa["P"]= [60,100,40];
 
-hslaa["G"]= [30,75,60];
+  hslaa["G"]= [30,75,60];
 
-hslaa["-"] = [0,0,100];
-hslaa["*"] = [0,0,0];
+  hslaa["-"] = [0,0,100];
+  hslaa["*"] = [0,0,0];
 
 var flag_redond = 1;
 var flag_histogram = 1;
 var colordna = new Object();
 var colordna_red = new Object();
-define_colordna()
+define_colordna() // Remplit colordna et colordna_red
 var  dico_aa = new Object();
 var  dico_dna = new Object();
 if (!isStorageSupported(myStorage)) {
