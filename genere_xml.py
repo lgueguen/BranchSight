@@ -426,6 +426,7 @@ def createPhyloXML(fam,alignmentDict,newick,results):
         global current_branch
         current_branch += 1
         return f'<closing_order>{current_branch}</closing_order></clade>'
+
     text = re.sub(r"</clade>", repl=count_repl, string=text)
 
     tree = etree.fromstring(text, parser=p)
@@ -472,7 +473,7 @@ def createPhyloXML(fam,alignmentDict,newick,results):
 
         famspecies[sp] = 1
 
-        ## Find sequence for current leaf name        
+        ## Find sequence for current node name        
         seq_alg = alignmentDict.get(sp)
         if not seq_alg:
           print ("undefined alignment for "+ sp)
@@ -625,6 +626,7 @@ if __name__ == "__main__":
 
   # Return Alignement & tree (&results)
   alignmentDict, tree, resulttmp = ASR_compute(args.alignmentFile, args.treeFile, sites)
+
   ### Each sequence is a list of states
   
   if not args.resultsFile:
