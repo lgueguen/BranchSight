@@ -1,0 +1,8 @@
+
+sudo su
+cd positive_selection
+git pull
+source /opt/venv/bin/activate
+pm2 stop selpos_machine_virtuelle.js
+pm2 start selpos_machine_virtuelle.js
+

@@ -3,9 +3,8 @@
 
 // Constants
 // addition port 8080  (port 3000 still working)
-// const PORT = 8080;
+const PORT = 8080;
 // const HOST = '0.0.0.0';
-const PORT = 8888;
 const HOST = '127.0.0.1';
 
 var express = require('express');
