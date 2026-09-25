@@ -69,6 +69,7 @@ var modStepX = 150;               // Pas de la variation en largeur
 var modStepY = 5;                 // Pas de la variation en hauteur
 var modeSite = false;             //false : mode fenetre, true : mode site
 var selectedSite = 0;
+var clickedSite = undefined;
 
 var hslaa = new Object(); // Dictionnaire des aa
 
