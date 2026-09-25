@@ -20,6 +20,9 @@ svgEvents.collapse = function(d) {
     d.data._clade = null;
     d.data.nodeinfo = {status : "extended"};
   }
+  // var  vertical = d3.select("#svg2");
+  // vertical.select("#vertical_rect").remove();
+  // displayVerticalLine(d,heightSVG,margin.top + 50 + psGraphHeight  + decalageY);  
   updateLayout(cladeRoot);
 }
 
@@ -37,6 +40,8 @@ svgEvents.openall = function(n) {
       d.data.clade = d.data._clade;;
     }
   })
+  // var  vertical = d3.select("#svg2");
+  // vertical.select("#vertical_rect").remove();
   updateLayout(cladeRoot);
 }
 
@@ -52,6 +57,8 @@ svgEvents.focus = function(d) {
     cladeRoot = parent.data;
     _Parent = parent.parent;
   }
+  // var  vertical = d3.select("#svg2");
+  // vertical.select("#vertical_rect").remove();
   updateLayout(cladeRoot);
 }
 
@@ -66,6 +73,8 @@ svgEvents.focus2 = function(d) {
     cladeRoot = _cladeRoot;
     _cladeRoot = null;
   }
+  // var  vertical = d3.select("#svg2");
+  // vertical.select("#vertical_rect").remove();
   updateLayout(cladeRoot);
 }
 

@@ -581,6 +581,7 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
         //console.log("click " + index + "=>"+d);
         modeSite = true;
         selectedSite = d;
+        // clickedSite = d;
         writeTooltip(d+1);
         showTooltip();
         displayVerticalLine(d,heightSVG,margin.top + 50 + psGraphHeight  + decalageY);
@@ -632,6 +633,7 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
         //console.log("click " + index + "=>"+d);
         modeSite = true;
         selectedSite = d;
+        // clickedSite = d;
         writeTooltip(d+1);
         showTooltip();
         displayVerticalLine(d,heightSVG, margin.top + 50 + psGraphHeight  + decalageY);        
@@ -997,6 +999,10 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
   // Fin modif : blocs de séquences
   // ==============================================================
   firstLoad = 0;
+
+  clickedSite = undefined;
+  displayVerticalLine(selectedSite,heightSVG, margin.top + 50 + psGraphHeight  + decalageY);    
+
     console.log('Fin updatesvg');
 }
 
@@ -1054,17 +1060,24 @@ function displayVerticalLine(site,height,ypos) {
   console.log("VERTICAL "+ site)
   var  vertical = d3.select("#svg2");
   vertical.select("#vertical_rect").remove();
-  vertical
-  .append("rect")
-    .attr("id","vertical_rect") 
-    .attr("x",(site)*hStep + seq_lg + 50)
-    .attr("y", ypos -5 )
-    .attr("width", hStep)
-    .attr("height", height + 10)
-    .attr("stroke", "blue")
-    .style('stroke-width', '2')
-    .style('fill','none')
-    ;
+  if ( site == clickedSite ) {
+    clickedSite = undefined;
+
+  }
+  else {
+    vertical
+    .append("rect")
+      .attr("id","vertical_rect") 
+      .attr("x",(site)*hStep + seq_lg + 50)
+      .attr("y", ypos -10 )
+      .attr("width", hStep)
+      .attr("height", height + 20)
+      .attr("stroke", "blue")
+      .style('stroke-width', '2')
+      .style('fill','none')
+      ;
+    clickedSite = site;
+  }
 }
 
 // Mise a jour de la couleur des noeuds apres un click
