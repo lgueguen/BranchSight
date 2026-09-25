@@ -27,7 +27,7 @@ def SubsCost(a,b, mat = {}):
     if len(a)==1:
       return 1
     else:
-      return sum(c1 == c2 for c1,c2 in zip(a,b))
+      return sum(c1 != c2 for c1,c2 in zip(a,b))
   else:
     return 0
 
@@ -109,7 +109,7 @@ class ASR_Node(Node):
     Only known states are built as they are found.
     """
 
-    if self.get_sequence() != "": ##Leaf or assigne sequence
+    if self.get_sequence() != "": ##Leaf or assigned sequence
       return
     else:
       for child in self.get_children():
@@ -143,7 +143,7 @@ class ASR_Node(Node):
             if vst < vok:
               vok = vst
           herecost[k] += vok
-        
+
   def __compute_backward(self, upcost = []):
     """Backward recursion of upward parsimony costs.
     A dictionnary of up costs is transmitted downward.
