@@ -999,6 +999,10 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
   // Fin modif : blocs de séquences
   // ==============================================================
   firstLoad = 0;
+
+  clickedSite = undefined;
+  displayVerticalLine(selectedSite,heightSVG, margin.top + 50 + psGraphHeight  + decalageY);    
+
     console.log('Fin updatesvg');
 }
 
