@@ -70,6 +70,8 @@ var modStepY = 5;                 // Pas de la variation en hauteur
 var modeSite = false;             //false : mode fenetre, true : mode site
 var selectedSite = undefined;
 var clickedSite = undefined;
+var clickedNode = undefined;
+var displayHorizontal = true;
 
 var hslaa = new Object(); // Dictionnaire des aa
 

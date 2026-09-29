@@ -238,9 +238,12 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
         .on('click', function(d) {
           if (action == svgEvents.showBranchResults && d.data.branch_info) {
             resultsJSON = JSON.parse(d.data.branch_info.results);
-            //console.log("DEBUG")
-            //console.log(this)
             selectedNode = d3.select(this);
+            clickedNode = d;
+          }
+          else {
+              var  horizontal = d3.select("#svg2");
+              horizontal.select("#horizontal_rect").remove();
           }
         });
   if (firstLoad) {
@@ -699,7 +702,6 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
   // var leaves_sequences = leaves.filter(function(d) {return (isNuc ? d.data.lastEvent.dnaAlign : d.data.lastEvent.aaAlign);});
   var leaves_sequences = leaves.filter(function(d) {return (d.data.lastEvent.aaAlign);});
   var leaves_sequences = leaves.filter(function(d) {return (true);});
-  // console.log("debug leave "+ d.data.name)
     leaves_sequences.forEach (function (d,i) {
       var leaf_name = d.data.lastEvent.name;
       var dna_sequence = d.data.lastEvent.dnaAlign;
@@ -1001,9 +1003,11 @@ function updateSvg(treeRoot,firstLoad ,config = {}) {
   firstLoad = 0;
 
   clickedSite = undefined;
-  displayVerticalLine(selectedSite,heightSVG, margin.top + 50 + psGraphHeight  + decalageY);    
-
-    console.log('Fin updatesvg');
+  displayVerticalLine(selectedSite,heightSVG, margin.top + 50 + psGraphHeight  + decalageY); 
+  if ((action == svgEvents.showBranchResults) && (displayHorizontal) && (clickedNode != undefined)) {
+    displayHonrizonalLine(clickedNode,minY,seq_lg + 50,psGraphWidth);
+  }
+  console.log('Fin updatesvg');
 }
 
 
@@ -1078,6 +1082,38 @@ function displayVerticalLine(site,height,ypos) {
       ;
     clickedSite = site;
   }
+}
+
+function get_left_right_leave(node, side) {
+  if (node.children) {
+      fils = node.data.clade;
+      fils = node.children;
+      return get_left_right_leave(fils[side],side)
+  }
+  else {
+    return node
+  }
+
+}
+
+function displayHonrizonalLine(node,minY,xmin,xmax) {
+  left = get_left_right_leave(node,0);
+  right = get_left_right_leave(node,1);
+  ymin = left.y;
+  ymax = right.y
+  var  horizontal = d3.select("#svg2");
+  horizontal.select("#horizontal_rect").remove();
+    horizontal
+    .append("rect")
+      .attr("id","horizontal_rect") 
+      .attr("x",xmin)
+      .attr("y", ymin + margin.top - minY - 13 )
+      .attr("width", xmax)
+      .attr("height", ymax - ymin + 26)
+      .attr("stroke", "blue")
+      .style('stroke-width', '4px')
+      .style('fill','none')
+      ;
 }
 
 // Mise a jour de la couleur des noeuds apres un click

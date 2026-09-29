@@ -109,6 +109,7 @@ $('#stat_precision').on('change', function(event) {
 
 $('#action').on('click', function(event, dropdownData) {
   event.preventDefault();
+  displayHorizontal = false;
   var target = event.toElement || event.relatedTarget || event.target || function () { throw "Failed to attach an event target!"; }
   myStorage.setItem("action",target.text);
   $('#button_action').text(target.text);
@@ -119,6 +120,7 @@ $('#action').on('click', function(event, dropdownData) {
       $('#switch').css('color','#000000');
       $('#collapse').css('color','#000000');
       $('#subtree').css('color','#000000');
+      displayHorizontal = true;
       break;
     case "Switch children":
       action = svgEvents.switchChildren;
@@ -153,13 +155,20 @@ $('#globalexpand').on('click', function(event, dropdownData) {
     return d.clade;
   });
   expandTree(treeRoot);
+  var  horizontal = d3.select("#svg2");
+  horizontal.select("#horizontal_rect").remove();
+  // displayHorizontal = false; 
   updateLayout(cladeRoot);
 });
 $('#resettree').on('click', function(event, dropdownData) {
   cladeRoot = recTree.phyloxml.phylogeny.clade;
   treeRoot = treeRootIni;
   resetTree(treeRoot);  
+  var  horizontal = d3.select("#svg2");
+  horizontal.select("#horizontal_rect").remove()
+  displayHorizontal = false; 
   updateLayout(cladeRoot);
+  displayHorizontal = true; 
 });
 $('#moreWidth').on('click', function(event, dropdownData) {
   nodeWidth += modStepX;
@@ -206,7 +215,11 @@ $('#moreHeigth').on('click', function(event, dropdownData) {
       alignmentLetterSpacing = alignmentLetterNormalSpacing;
     } 
   //console.log("node = "+nodeHeight+"; letter = "+hLetter);
+  var  horizontal = d3.select("#svg2");
+  horizontal.select("#horizontal_rect").remove();
+  displayHorizontal = false; 
   updateLayout(cladeRoot);
+  displayHorizontal = true; 
 });
 $('#lessHeigth').on('click', function(event, dropdownData) {
   if (nodeHeight - modStepY >= 10 ) {
@@ -224,7 +237,11 @@ $('#lessHeigth').on('click', function(event, dropdownData) {
       fitPoliceSize = fitSmallPoliceSize;
     }    
       //console.log("node = "+nodeHeight+"; letter = "+hLetter);
-    updateLayout(cladeRoot);
+  var  horizontal = d3.select("#svg2");
+  horizontal.select("#horizontal_rect").remove();
+  displayHorizontal = false; 
+  updateLayout(cladeRoot);
+  displayHorizontal = true; 
   }
 });
 $('#redondance').on('click', function(event, dropdownData) {
