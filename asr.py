@@ -17,17 +17,19 @@ import genere_xml
 from Bio.Align import substitution_matrices
 #~matrix = substitution_matrices.load("BLOSUM62")
 
+debug = False
+
 def SubsCost(a,b, mat = {}):
   """Costs for substitutions. Indels cost likewise.
 
   """
   if a=="?" or b=="?":
-    return 1
+    return max(len(a),len(b))
   if a!=b:
     if len(a)==1:
       return 1
     else:
-      return sum(c1 != c2 for c1,c2 in zip(a,b))
+      return sum(c1 != c2 for c1,c2 in zip(a,b) if c1!="-" and c2!="-")
   else:
     return 0
 
@@ -99,7 +101,7 @@ class ASR_Node(Node):
     self.__compute_backward()
 
 
-  def __get_costs(self, pos):
+  def get_costs(self, pos):
     return self.__costs[pos]
 
   
@@ -143,7 +145,12 @@ class ASR_Node(Node):
             if vst < vok:
               vok = vst
           herecost[k] += vok
-
+          
+        if debug:
+          print(self.label(), herecost)
+          for child in self.get_children():
+            print("\t",child.label(), child.get_costs(pos))
+        
   def __compute_backward(self, upcost = []):
     """Backward recursion of upward parsimony costs.
     A dictionnary of up costs is transmitted downward.
@@ -220,7 +227,7 @@ class ASR_Node(Node):
           if not k in upcost[pos]:
             self.__costs[pos][k]+=upcost[pos]["?"]        
 
-if __name__ == "__main__":
+def main():
   parser = argparse.ArgumentParser()
 
   parser.add_argument('-t', '--tree', dest='tree', action='store',\
@@ -305,3 +312,6 @@ if __name__ == "__main__":
       fout.write("\n")
     fout.close()
 
+
+if __name__ == "__main__":
+  main()
