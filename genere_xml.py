@@ -334,7 +334,7 @@ def ASR_compute(alignmentFile, treeFile, sites = []):
       else:
         seq = node.get_sequence()
         up = node.go_father().get_sequence()
-        results[str(n)] = '[' + ",".join([str(asr.SubsCost(up[i], seq[i])) for i in range(lseq)]) + ']'
+        results[str(n)] = '[' + ",".join([str(asr.SubsCost(up[i], seq[i], indel = 0)) for i in range(lseq)]) + ']'
 
 
     for i in range(lseq):
@@ -347,7 +347,7 @@ def ASR_compute(alignmentFile, treeFile, sites = []):
           seq = node.get_sequence()
           up = node.go_father().get_sequence()
 
-          fout.write("\t"+str(asr.SubsCost(up[i], seq[i])))
+          fout.write("\t"+str(asr.SubsCost(up[i], seq[i], indel = 0)))
       fout.write("\n")
 
     fout.close()

@@ -19,9 +19,13 @@ from Bio.Align import substitution_matrices
 
 debug = False
 
-def SubsCost(a,b, mat = {}):
-  """Costs for substitutions. Indels cost likewise.
+def SubsCost(a,b, mat = {}, indel = 1):
+  """Costs for substitutions.
 
+  Param:
+    indel : cost of indel at each position
+
+  
   """
   if a=="?" or b=="?":
     return max(len(a),len(b))
@@ -29,7 +33,7 @@ def SubsCost(a,b, mat = {}):
     if len(a)==1:
       return 1
     else:
-      return sum(c1 != c2 for c1,c2 in zip(a,b) if c1!="-" and c2!="-")
+     return sum(c1 != c2 for c1,c2 in zip(a,b) if c1!="-" and c2!="-") + indel * sum(c1 != c2 for c1,c2 in zip(a,b) if c1=="-" or c2=="-")
   else:
     return 0
 
@@ -45,7 +49,6 @@ def add_cost_to(cost1, cost2):
       cost1[k] = v
 
       
-
 
 class ASR_Node(Node):
   """Cost of states at leaves, given list of conditional states at a
@@ -78,7 +81,14 @@ class ASR_Node(Node):
     if len(self.__bestseq)==0:
       lseq=[]
       for pos in range(self.__lenseq):
-        lseq.append(min(self.__costs[pos], key=self.__costs[pos].get))
+        mincost = min(self.__costs[pos].values())
+        allstates = [st for st,val in self.__costs[pos].items() if val==mincost]
+        statesok = [st for st in allstates if not "-" in st]
+        if len(statesok)!=0:
+          lseq.append(statesok[0])
+        else:
+          lseq.append(allstates[0])
+
       self.__bestseq = lseq
 
   def len_seq(self):
@@ -98,6 +108,11 @@ class ASR_Node(Node):
     """
 
     self.__compute_forward()
+    if debug:
+      print()
+      print("--------------------------------------------------")
+      print()
+
     self.__compute_backward()
 
 
@@ -146,10 +161,10 @@ class ASR_Node(Node):
               vok = vst
           herecost[k] += vok
           
-        if debug:
-          print(self.label(), herecost)
-          for child in self.get_children():
-            print("\t",child.label(), child.get_costs(pos))
+      if debug:
+        print(self.label(), herecost)
+        for child in self.get_children():
+          print("\t -> ",child.label(), child.get_costs(pos))
         
   def __compute_backward(self, upcost = []):
     """Backward recursion of upward parsimony costs.
@@ -226,6 +241,13 @@ class ASR_Node(Node):
         for k in self.__costs[pos]:
           if not k in upcost[pos]:
             self.__costs[pos][k]+=upcost[pos]["?"]        
+
+    if debug:
+      print(self.label(), self.__costs[pos])
+      if upcost!=[]:
+        print(" <-", self.go_father().label(), upcost[pos])
+
+
 
 def main():
   parser = argparse.ArgumentParser()
@@ -305,7 +327,7 @@ def main():
           seqi = node.get_sequence()[pos]
           upi = par.get_sequence()[pos]
           
-          cost = SubsCost(upi, seqi)
+          cost = SubsCost(upi, seqi, indel = 0)
 
         fout.write("\t%f"%(cost))
 
