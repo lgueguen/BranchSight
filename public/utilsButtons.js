@@ -156,9 +156,10 @@ $('#globalexpand').on('click', function(event, dropdownData) {
   });
   expandTree(treeRoot);
   var  horizontal = d3.select("#svg2");
-  horizontal.select("#horizontal_rect").remove();
-  // displayHorizontal = false; 
+  horizontal.select("#horizontal_rect").remove()
+  displayHorizontal = false; 
   updateLayout(cladeRoot);
+  displayHorizontal = true; 
 });
 $('#resettree').on('click', function(event, dropdownData) {
   cladeRoot = recTree.phyloxml.phylogeny.clade;
