@@ -815,7 +815,7 @@ class Node(object):
       s += ":0"
                           
     if s:
-      self._parser(s)
+      self._parser(s, [])
     else:
       raise ValueError("This should not have happened! Check behind your back.")
 
