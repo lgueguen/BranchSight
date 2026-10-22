@@ -28,7 +28,6 @@ import string
 import copy
 import re
 from math import log
-import numpy
 import os
 
 #######################################################################
