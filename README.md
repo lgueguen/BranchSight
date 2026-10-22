@@ -43,21 +43,9 @@ On the homepage, upload your three files on the required fields:
  | [11] | 0.424406720630182 | 0 | 0.363677085259181 | 0.364045980870431 | 0.321583080347298 | 
  | [12] | 0.322704805534562 | 0 | 0 | 0 | 0 | 
 
-### Other fields
-
-If your data requires specific parameters, you are free to change several options:
-
-- A toggle to choose whether your sequences should be treated as nucleotidic (and translated 
-into proteins) or not
-
-- A toggle for the logarithmic transformation of branch lengths (can be useful 
-to create space in the tree if some branches are really short)
-
-- Which column to use for the results (site mode)
-
 Once you are done, just click the *Display* button and the visualization will be available.
 
-![Image formulaire](image.png)
+![Image formulaire](BranchSight.png)
 
 ## Visualization page
 
