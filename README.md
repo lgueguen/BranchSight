@@ -45,25 +45,34 @@ On the homepage, upload your three files on the required fields:
 
 Once you are done, just click the *Display* button and the visualization will be available.
 
-![Image formulaire](BranchSight.png)
-
 ## Visualization page
+
+![Image formulaire](BranchSight.png)
 
 The layout is as follows:
 
 - Tree on the left
 - Results histogram and alignment on the right
 
-![Image données](image.png)
-
-Parameters include:
-
-- Which sequence type to display (amino acids / nucleotides)
-
-- Choosing between thresholds for computations
+Buttons include:
+- Toggle **Histogram** to show/hide the histograms
+- **Precision** to give more importance to sites near the middle of the window: if
+the middle of the window is at position $m$, and the precision is $p$,
+the importance of a site $s$ inside the visible window is proportional
+to $\exp(p . (s-m)^2)$. When $p=0$ (default value), all sites in the
+window have equal importance.
+- Several tree manipulation options through clicking on nodes:
+    - **View Branch Results**
+    - **Switch children** to switch orders in tree branches
+    - **Collapse/Expand** to hide/show clades
+    - **Sub Tree/Upper Tree** to show only a subtree
+- **Expand Tree** shows all hidden branches
+- **Reset Tree** resets tree with all starting nodes
+- **Width, Logarithmic, Height** buttons change appearance sizes of the tree
+- **Alignment Type** In case of coding sequences, chooses which sequence type to display (amino acids / codons)
+- **Redundancy** with codons toggles fading of synonymous codons
+- **Export** to export Tree/Alignment in svg format
+- **Thresholds** to choose between thresholds for coloring:
     - "<" will look at values below the lower threshold
     - ">" will consider values above the upper threshold
 
-- In branch-site mode, boundaries that are used to compute branch colors
-    - If you want colors to reflect the local aspect of branches, you may enable the "Update on scroll" option
-    - "Reset" replaces the current values to account for the whole sequence
